@@ -2,6 +2,7 @@ import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getCheckoutProducts } from "./products";
 import { getStripeClient } from "./stripe";
+import { ensureStripeCustomer } from "./stripeCustomer";
 import { protectedProcedure, router } from "./_core/trpc";
 
 const checkoutInput = z.object({
@@ -18,10 +19,11 @@ export const checkoutRouter = router({
 
     let session;
     try {
+      const customerId = await ensureStripeCustomer(ctx.user);
       session = await getStripeClient().checkout.sessions.create({
         mode: "payment",
         client_reference_id: ctx.user.id.toString(),
-        customer_email: ctx.user.email || undefined,
+        customer: customerId,
         allow_promotion_codes: true,
         billing_address_collection: "required",
         shipping_address_collection: { allowed_countries: ["IN"] },

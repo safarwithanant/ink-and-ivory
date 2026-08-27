@@ -19,6 +19,7 @@ function createAuthContext(): { ctx: TrpcContext; clearedCookies: CookieCall[] }
     email: "sample@example.com",
     name: "Sample User",
     loginMethod: "manus",
+    stripeCustomerId: null,
     role: "user",
     createdAt: new Date(),
     updatedAt: new Date(),

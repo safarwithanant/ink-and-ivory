@@ -1,6 +1,7 @@
-import { eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
-import { InsertUser, users } from "../drizzle/schema";
+import { TRPCError } from "@trpc/server";
+import { InsertShippingAddress, InsertUser, shippingAddresses, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -89,4 +90,58 @@ export async function getUserByOpenId(openId: string) {
   return result.length > 0 ? result[0] : undefined;
 }
 
-// TODO: add feature queries here as your schema grows.
+export async function setUserStripeCustomerId(userId: number, stripeCustomerId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.update(users).set({ stripeCustomerId }).where(eq(users.id, userId));
+}
+
+export async function listShippingAddresses(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  return db.select().from(shippingAddresses).where(eq(shippingAddresses.userId, userId)).orderBy(desc(shippingAddresses.isDefault), desc(shippingAddresses.updatedAt));
+}
+
+type AddressValues = Omit<InsertShippingAddress, "id" | "userId" | "createdAt" | "updatedAt">;
+
+async function assertOwnedShippingAddress(userId: number, addressId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const address = await db.select({ id: shippingAddresses.id }).from(shippingAddresses).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId))).limit(1);
+  if (!address.length) {
+    throw new TRPCError({ code: "NOT_FOUND", message: "That saved address is unavailable on this profile." });
+  }
+  return db;
+}
+
+export async function createShippingAddress(userId: number, values: AddressValues) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.transaction(async tx => {
+    const existing = await tx.select({ id: shippingAddresses.id }).from(shippingAddresses).where(eq(shippingAddresses.userId, userId)).limit(1);
+    const shouldBeDefault = values.isDefault || existing.length === 0;
+    if (shouldBeDefault) await tx.update(shippingAddresses).set({ isDefault: false }).where(eq(shippingAddresses.userId, userId));
+    await tx.insert(shippingAddresses).values({ ...values, userId, isDefault: shouldBeDefault });
+  });
+}
+
+export async function updateShippingAddress(userId: number, addressId: number, values: AddressValues) {
+  const db = await assertOwnedShippingAddress(userId, addressId);
+  await db.transaction(async tx => {
+    if (values.isDefault) await tx.update(shippingAddresses).set({ isDefault: false }).where(eq(shippingAddresses.userId, userId));
+    await tx.update(shippingAddresses).set(values).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId)));
+  });
+}
+
+export async function deleteShippingAddress(userId: number, addressId: number) {
+  const db = await assertOwnedShippingAddress(userId, addressId);
+  await db.delete(shippingAddresses).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId)));
+}
+
+export async function setDefaultShippingAddress(userId: number, addressId: number) {
+  const db = await assertOwnedShippingAddress(userId, addressId);
+  await db.transaction(async tx => {
+    await tx.update(shippingAddresses).set({ isDefault: false }).where(eq(shippingAddresses.userId, userId));
+    await tx.update(shippingAddresses).set({ isDefault: true }).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId)));
+  });
+}

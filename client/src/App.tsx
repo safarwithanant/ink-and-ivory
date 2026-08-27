@@ -9,6 +9,7 @@ import CartPage from "./pages/CartPage";
 import CategoryPage from "./pages/CategoryPage";
 import CheckoutResultPage from "./pages/CheckoutResultPage";
 import Home from "./pages/Home";
+import ProfilePage from "./pages/ProfilePage";
 import { ScrollToTop } from "./components/ScrollToTop";
 
 function Router() {
@@ -20,6 +21,7 @@ function Router() {
       <Route path={"/book/:id"} component={BookDetailPage} />
       <Route path={"/cart"} component={CartPage} />
       <Route path={"/checkout/:status"} component={CheckoutResultPage} />
+      <Route path={"/profile"} component={ProfilePage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />

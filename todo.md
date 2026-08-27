@@ -37,3 +37,11 @@
 - [x] Add automated coverage and desktop/mobile verification for scroll restoration, cart behavior, and checkout state handling.
 - [x] Add rendered route-state tests for checkout success and cancellation pages.
 - [x] Add UI-level coverage confirming route navigation restores the page to the top.
+- [x] Add a secure address-book data model and Stripe customer identifier, without storing card numbers or other sensitive payment data.
+- [x] Build protected profile procedures for creating, editing, deleting, and selecting saved shipping addresses.
+- [x] Build protected Stripe customer and payment-method procedures that return only non-sensitive payment metadata.
+- [x] Create an authenticated profile page for personal details, saved addresses, and payment methods.
+- [x] Link the storefront navigation to the profile area and verify its responsive, protected states with tests.
+- [x] Return an explicit authorization or not-found result when an address mutation targets a missing or unowned address.
+- [x] Add visible profile query errors and mutation success/error feedback for address and payment-method management.
+- [x] Add rendered profile route-state and profile-navigation target tests.

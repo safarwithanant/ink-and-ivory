@@ -8,6 +8,13 @@
       "when": 1787848327256,
       "tag": "0000_wild_brother_voodoo",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1787855431314,
+      "tag": "0001_material_vulture",
+      "breakpoints": true
     }
   ]
 }
