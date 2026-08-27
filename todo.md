@@ -18,3 +18,4 @@
 - [x] Extend the editorial hero photograph across the full hero background while preserving readable headline contrast.
 - [x] Add restrained book-themed decorative motifs across the homepage without competing with content or accessibility.
 - [x] Keep prices visible and clearly spaced in the repaired mobile bestseller rows.
+- [x] Fix all category tiles so each title, description, arrow, and decorative shape is visually stable at mobile and desktop sizes.

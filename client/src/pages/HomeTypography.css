@@ -50,6 +50,13 @@
   .bestseller-row__title span { display: block; font: 400 13px/1.35 var(--body) !important; }
   .bestseller-row__price { display: block !important; font: 600 12px var(--sans) !important; white-space: nowrap; }
   .bestseller-row__arrow { grid-column: auto !important; align-self: center; }
+
+  .category-card { isolation: isolate; }
+  .category-card:hover { color: var(--ink) !important; }
+  .category-card:hover::after { background: var(--paper-deep) !important; transform: rotate(25deg) !important; }
+  .category-card--2:hover::after, .category-card--5:hover::after { background: #dbc8a6 !important; }
+  .category-card--3:hover::after, .category-card--7:hover::after { background: #64313a !important; transform: rotate(25deg) !important; }
+  .category-card--4:hover::after, .category-card--8:hover::after { background: #b0b9ae !important; transform: rotate(40deg) !important; }
 }
 
 /* Full-bleed hero composition with an editorial veil for readable headline contrast. */
