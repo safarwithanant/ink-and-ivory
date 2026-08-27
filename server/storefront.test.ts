@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { books } from "../client/src/data/catalog";
+import { books, categoryMeta, categoryToSlug, filterCategoryBooks, getCategoryFromSlug } from "../client/src/data/catalog";
 
 function searchCatalog(query: string) {
   const normalized = query.trim().toLowerCase();
@@ -22,6 +22,22 @@ function decrementCart(cart: Record<string, number>, bookId: string) {
 }
 
 describe("INK & IVORY storefront catalogue", () => {
+  it("maps every supported category to a stable browseable route", () => {
+    expect(categoryToSlug("Mystery & Thriller")).toBe("mystery-and-thriller");
+    expect(getCategoryFromSlug("mystery-and-thriller")).toBe("Mystery & Thriller");
+    const catalogueCategories = new Set(books.map(book => book.category));
+    Object.keys(categoryMeta).forEach(category => {
+      expect(catalogueCategories.has(category)).toBe(true);
+      expect(getCategoryFromSlug(categoryToSlug(category))).toBe(category);
+    });
+  });
+
+  it("filters an individual category shelf without showing another category's books", () => {
+    expect(filterCategoryBooks("Fiction", "noah").map(book => book.id)).toEqual(["after-last-train"]);
+    expect(filterCategoryBooks("Fiction", "").map(book => book.id)).toEqual(["after-last-train", "room-sunlight"]);
+    expect(filterCategoryBooks("Fiction", "observatory")).toEqual([]);
+  });
+
   it("searches titles, authors, categories, ISBNs, and keywords", () => {
     expect(searchCatalog("psychology").map(book => book.id)).toEqual(expect.arrayContaining(["quiet-architect", "human-pattern"]));
     expect(searchCatalog("Elias Rowan")[0]?.id).toBe("quiet-architect");

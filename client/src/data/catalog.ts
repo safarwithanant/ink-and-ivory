@@ -325,6 +325,37 @@ export const journalEntries = [
   },
 ] as const;
 
+export const categoryMeta: Record<string, { description: string; note: string }> = {
+  Fiction: { description: "Fiction for disappearing into, then carrying back with you.", note: "Stories worth stepping inside." },
+  Psychology: { description: "Clearer ways of seeing ourselves and the people around us.", note: "A study of being human." },
+  "Self Development": { description: "Quiet tools for becoming more of who you are.", note: "Small shifts. Larger days." },
+  Business: { description: "Thoughtful ideas for building work that matters.", note: "For the work of making." },
+  Poetry: { description: "Language with enough room to breathe.", note: "A line for your pocket." },
+  Romance: { description: "Love stories with warmth, wit, and long attention.", note: "For the heart's long attention." },
+  Philosophy: { description: "Books that make the familiar feel newly interesting.", note: "Thoughts with good bones." },
+  "Mystery & Thriller": { description: "Atmosphere, tension, and the pleasure of one more page.", note: "Follow the clue." },
+  Biography: { description: "Lives examined with honesty, curiosity, and grace.", note: "A life in full." },
+  Lifestyle: { description: "Gentle companions for a more considered everyday.", note: "Make the ordinary luminous." },
+  Science: { description: "Big questions made lucid, lyrical, and alive.", note: "Curiosity has its own shelf." },
+};
+
+export function categoryToSlug(category: string) {
+  return category.toLowerCase().replace(/&/g, "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+export function getCategoryFromSlug(slug: string) {
+  return Object.keys(categoryMeta).find(category => categoryToSlug(category) === slug);
+}
+
+export function filterCategoryBooks(category: string, query: string) {
+  const term = query.trim().toLowerCase();
+  return books.filter(book => {
+    if (book.category !== category) return false;
+    if (!term) return true;
+    return [book.title, book.author, ...book.keywords].some(value => value.toLowerCase().includes(term));
+  });
+}
+
 export function formatPrice(price: number) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",

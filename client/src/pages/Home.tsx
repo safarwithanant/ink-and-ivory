@@ -19,8 +19,10 @@ import {
   X,
 } from "lucide-react";
 import { toast } from "sonner";
+import { useLocation } from "wouter";
 import {
   books,
+  categoryToSlug,
   categoryNotes,
   formatPrice,
   journalEntries,
@@ -127,6 +129,7 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [quickView, setQuickView] = useState<Book | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const [, setLocation] = useLocation();
 
   useEffect(() => {
     try {
@@ -184,9 +187,7 @@ export default function Home() {
   };
 
   const showCategory = (category: string) => {
-    setActiveCategory(category);
-    setSearchQuery("");
-    scrollTo("catalogue");
+    setLocation(`/category/${categoryToSlug(category)}`);
   };
 
   const addToBag = (book: Book) => {
@@ -317,7 +318,7 @@ export default function Home() {
           <SectionHeading eyebrow={searchQuery ? `Search results for “${searchQuery}”` : "The edit"} title={searchQuery ? `${catalogBooks.length} books found` : "Featured titles."} linkLabel={activeCategory !== "All" || searchQuery ? "Clear filters" : "View all books"} onLink={() => { setSearchQuery(""); setActiveCategory("All"); }} />
           <div className="catalogue-toolbar">
             <div className="category-pills" aria-label="Filter books by category">
-              {["All", ...categoryNotes.map(([name]) => name)].map(category => <button key={category} onClick={() => { setActiveCategory(category); setSearchQuery(""); }} className={activeCategory === category ? "is-selected" : ""}>{category}</button>)}
+              {["All", ...categoryNotes.map(([name]) => name)].map(category => <button key={category} onClick={() => category === "All" ? (setActiveCategory("All"), setSearchQuery("")) : showCategory(category)} className={activeCategory === category ? "is-selected" : ""}>{category}</button>)}
             </div>
             <button className="search-launcher" onClick={() => setSearchOpen(true)}><Search size={16} /> Search the shelves</button>
           </div>

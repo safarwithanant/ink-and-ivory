@@ -19,3 +19,9 @@
 - [x] Add restrained book-themed decorative motifs across the homepage without competing with content or accessibility.
 - [x] Keep prices visible and clearly spaced in the repaired mobile bestseller rows.
 - [x] Fix all category tiles so each title, description, arrow, and decorative shape is visually stable at mobile and desktop sizes.
+- [x] Create a reusable category landing-page template with category identity, book discovery, search, and category navigation.
+- [x] Add dedicated routes for every category represented in the bookstore catalogue.
+- [x] Link category tiles and category filters to the dedicated category landing pages.
+- [x] Add tests and desktop/mobile visual verification for category-page routing and browsing.
+- [x] Verify a category landing page at a mobile breakpoint and resolve any responsive issue found.
+- [x] Add focused test coverage for category-page book filtering behavior.
