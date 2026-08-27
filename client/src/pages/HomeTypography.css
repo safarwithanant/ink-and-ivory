@@ -1,0 +1,36 @@
+/* This stylesheet is imported after global styles so mobile type rules remain deliberate and readable. */
+@media (max-width: 760px) {
+  .announcement {
+    min-height: 38px !important;
+    padding: 10px 16px !important;
+    font: 500 12px/1.3 var(--sans) !important;
+  }
+
+  .action-count {
+    min-width: 15px !important;
+    height: 15px !important;
+    font-size: 10px !important;
+  }
+
+  .hero__copy,
+  .feature-split__copy > p:not(.eyebrow) {
+    font: 400 16px/1.6 var(--body) !important;
+  }
+
+  .section-heading .text-link,
+  .category-pills button,
+  .search-launcher,
+  .badge,
+  .quick-view {
+    font: 600 12px/1.2 var(--sans) !important;
+  }
+
+  .category-card p,
+  .product-card__author,
+  .footer-links button {
+    font: 400 13px/1.45 var(--body) !important;
+  }
+
+  .product-card__author { min-height: 0 !important; }
+  .book-cover__copy span { font-size: 18px !important; }
+}

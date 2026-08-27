@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import "./HomeTypography.css";
 import {
   ArrowRight,
   ArrowUpRight,
