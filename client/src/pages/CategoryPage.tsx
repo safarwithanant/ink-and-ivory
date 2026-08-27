@@ -3,7 +3,7 @@ import { ArrowLeft, ArrowRight, BookOpen, Heart, Search, ShoppingBag, X } from "
 import { toast } from "sonner";
 import { useLocation, useRoute } from "wouter";
 import "./CategoryPage.css";
-import { books, categoryMeta, categoryToSlug, filterCategoryBooks, formatPrice, getCategoryFromSlug, type Book } from "@/data/catalog";
+import { books, categoryMeta, categoryToSlug, filterCategoryBooks, formatPrice, getBookDetailPath, getCategoryFromSlug, type Book } from "@/data/catalog";
 
 function CategoryBookCover({ book }: { book: Book }) {
   const [base, accent, ink] = book.cover.palette;
@@ -86,7 +86,7 @@ export default function CategoryPage() {
               <div><h2>On this shelf</h2><p>Selected with a reader’s eye.</p></div>
               <label className="category-search"><Search size={17} /><input value={query} onChange={event => setQuery(event.target.value)} placeholder={`Search ${category.toLowerCase()}…`} />{query && <button onClick={() => setQuery("")} aria-label="Clear search"><X size={15} /></button>}</label>
             </div>
-            {visibleBooks.length ? <div className="category-book-grid">{visibleBooks.map(book => <article className="category-book" key={book.id}><div className="category-book__visual"><CategoryBookCover book={book} />{book.badge && <span className="badge">{book.badge}</span>}</div><div className="category-book__meta"><h3>{book.title}</h3><p>{book.author}</p><div><span>{formatPrice(book.price)}</span><button className={wishlist.includes(book.id) ? "wish-button is-saved" : "wish-button"} onClick={() => toggleWishlist(book)} aria-label={`Toggle ${book.title} wishlist`}><Heart size={16} fill={wishlist.includes(book.id) ? "currentColor" : "none"} /></button><button className="add-button" onClick={() => addToBag(book)} aria-label={`Add ${book.title} to bag`}>Add <ArrowRight size={14} /></button></div></div></article>)}</div> : <div className="category-empty"><BookOpen size={25} /><h3>No match on this shelf.</h3><p>Try another title or author.</p><button className="text-link" onClick={() => setQuery("")}>Clear search <X size={14} /></button></div>}
+            {visibleBooks.length ? <div className="category-book-grid">{visibleBooks.map(book => <article className="category-book" key={book.id}><button className="category-book__visual" onClick={() => setLocation(getBookDetailPath(book))} aria-label={`Open ${book.title}`}><CategoryBookCover book={book} />{book.badge && <span className="badge">{book.badge}</span>}</button><div className="category-book__meta"><h3><button onClick={() => setLocation(getBookDetailPath(book))}>{book.title}</button></h3><p>{book.author}</p><div><span>{formatPrice(book.price)}</span><button className={wishlist.includes(book.id) ? "wish-button is-saved" : "wish-button"} onClick={() => toggleWishlist(book)} aria-label={`Toggle ${book.title} wishlist`}><Heart size={16} fill={wishlist.includes(book.id) ? "currentColor" : "none"} /></button><button className="add-button" onClick={() => addToBag(book)} aria-label={`Add ${book.title} to bag`}>Add <ArrowRight size={14} /></button></div></div></article>)}</div> : <div className="category-empty"><BookOpen size={25} /><h3>No match on this shelf.</h3><p>Try another title or author.</p><button className="text-link" onClick={() => setQuery("")}>Clear search <X size={14} /></button></div>}
           </div>
         </section>
       </main>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { books, categoryMeta, categoryToSlug, filterCategoryBooks, getCategoryFromSlug } from "../client/src/data/catalog";
+import { books, categoryMeta, categoryToSlug, filterCategoryBooks, getBookById, getBookDetailPath, getCategoryFromSlug, getRelatedBooks, resolveBookDetailPath } from "../client/src/data/catalog";
 
 function searchCatalog(query: string) {
   const normalized = query.trim().toLowerCase();
@@ -36,6 +36,22 @@ describe("INK & IVORY storefront catalogue", () => {
     expect(filterCategoryBooks("Fiction", "noah").map(book => book.id)).toEqual(["after-last-train"]);
     expect(filterCategoryBooks("Fiction", "").map(book => book.id)).toEqual(["after-last-train", "room-sunlight"]);
     expect(filterCategoryBooks("Fiction", "observatory")).toEqual([]);
+  });
+
+  it("resolves individual titles and returns distinct related books", () => {
+    const book = getBookById("quiet-architect");
+    expect(book?.title).toBe("The Quiet Architect");
+    expect(getBookById("missing-title")).toBeUndefined();
+    expect(book && getRelatedBooks(book).every(related => related.id !== book.id)).toBe(true);
+    expect(book && getRelatedBooks(book)[0]?.category).toBe(book.category);
+  });
+
+  it("resolves valid book detail paths and rejects malformed or unknown detail paths", () => {
+    expect(getBookDetailPath({ id: "quiet-architect" })).toBe("/book/quiet-architect");
+    expect(resolveBookDetailPath("/book/quiet-architect")?.title).toBe("The Quiet Architect");
+    expect(resolveBookDetailPath("/book/missing-title")).toBeUndefined();
+    expect(resolveBookDetailPath("/category/psychology")).toBeUndefined();
+    expect(resolveBookDetailPath("/book/quiet-architect/extra")).toBeUndefined();
   });
 
   it("searches titles, authors, categories, ISBNs, and keywords", () => {

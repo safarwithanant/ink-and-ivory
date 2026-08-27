@@ -356,6 +356,25 @@ export function filterCategoryBooks(category: string, query: string) {
   });
 }
 
+export function getBookById(id: string) {
+  return books.find(book => book.id === id);
+}
+
+export function getBookDetailPath(book: Pick<Book, "id">) {
+  return `/book/${book.id}`;
+}
+
+export function resolveBookDetailPath(path: string) {
+  const match = path.match(/^\/book\/([^/]+)$/);
+  return match ? getBookById(match[1]) : undefined;
+}
+
+export function getRelatedBooks(book: Book, limit = 3) {
+  const sameShelf = books.filter(item => item.category === book.category && item.id !== book.id);
+  const supportingEdit = books.filter(item => item.id !== book.id && item.category !== book.category && item.featured);
+  return [...sameShelf, ...supportingEdit].slice(0, limit);
+}
+
 export function formatPrice(price: number) {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",

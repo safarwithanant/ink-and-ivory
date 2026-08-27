@@ -25,3 +25,8 @@
 - [x] Add tests and desktop/mobile visual verification for category-page routing and browsing.
 - [x] Verify a category landing page at a mobile breakpoint and resolve any responsive issue found.
 - [x] Add focused test coverage for category-page book filtering behavior.
+- [x] Create a reusable book-detail page with book synopsis, edition metadata, price, bag/wishlist controls, related books, and a truthful verified-reviews area.
+- [x] Add a dedicated route for every title and connect book cards to those detail pages.
+- [x] Add route and related-book selection tests, then verify book-detail pages on desktop and mobile.
+- [x] Add focused test coverage that valid and invalid book-detail URLs resolve to the expected page state.
+- [x] Add rendered UI route-state tests for valid and invalid book-detail URLs.

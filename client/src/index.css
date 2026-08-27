@@ -125,6 +125,8 @@ h1, h2, h3, p { margin-top: 0; }
 .product-card__meta { padding-top: 16px; }
 .product-card__category { margin: 0 0 7px; color: var(--red); font: 600 12px var(--sans); letter-spacing: .01em; }
 .product-card h3 { margin: 0; font: 600 clamp(18px, 1.7vw, 23px)/1.08 var(--serif); letter-spacing: -.04em; }
+.product-card__title-button { padding: 0; border: 0; color: inherit; background: transparent; font: inherit; text-align: left; }
+.product-card__title-button:hover { color: var(--red); }
 .product-card__author { margin: 6px 0 15px; color: #685e54; font: 400 14px/1.35 var(--body); }
 .product-card__bottom { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid var(--line); padding-top: 12px; }
 .price-block { display: flex; align-items: center; gap: 7px; font: 600 14px var(--sans); }

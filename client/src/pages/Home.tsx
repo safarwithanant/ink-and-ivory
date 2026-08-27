@@ -25,6 +25,7 @@ import {
   categoryToSlug,
   categoryNotes,
   formatPrice,
+  getBookDetailPath,
   journalEntries,
   readingPaths,
   type Book,
@@ -76,12 +77,14 @@ function ProductCard({
   onToggleWish,
   onAdd,
   onQuickView,
+  onDetails,
 }: {
   book: Book;
   isWishlisted: boolean;
   onToggleWish: (book: Book) => void;
   onAdd: (book: Book) => void;
   onQuickView: (book: Book) => void;
+  onDetails: (book: Book) => void;
 }) {
   return (
     <article className="product-card">
@@ -101,7 +104,7 @@ function ProductCard({
       </div>
       <div className="product-card__meta">
         <p className="product-card__category">{book.category}</p>
-        <h3>{book.title}</h3>
+        <h3><button className="product-card__title-button" onClick={() => onDetails(book)}>{book.title}</button></h3>
         <p className="product-card__author">{book.author}</p>
         <div className="product-card__bottom">
           <div className="price-block">
@@ -324,7 +327,7 @@ export default function Home() {
           </div>
           {catalogBooks.length > 0 ? (
             <div className="product-grid">
-              {catalogBooks.slice(0, searchQuery || activeCategory !== "All" ? 18 : 8).map(book => <ProductCard key={book.id} book={book} isWishlisted={wishlist.includes(book.id)} onToggleWish={toggleWish} onAdd={addToBag} onQuickView={setQuickView} />)}
+              {catalogBooks.slice(0, searchQuery || activeCategory !== "All" ? 18 : 8).map(book => <ProductCard key={book.id} book={book} isWishlisted={wishlist.includes(book.id)} onToggleWish={toggleWish} onAdd={addToBag} onQuickView={setQuickView} onDetails={book => setLocation(getBookDetailPath(book))} />)}
             </div>
           ) : (
             <div className="empty-search"><Sparkles size={25} /><h3>Nothing found quite yet.</h3><p>Try an author, a title, or a different category.</p><button className="text-link" onClick={() => { setSearchQuery(""); setActiveCategory("All"); }}>Return to the full collection <ArrowRight size={15} /></button></div>
@@ -336,7 +339,7 @@ export default function Home() {
             <SectionHeading eyebrow="The readers' edit" title="Bestsellers, beautifully bound." />
             <div className="bestseller-list">
               {books.filter(book => book.bestseller).slice(0, 5).map((book, index) => (
-                <button key={book.id} className="bestseller-row" onClick={() => setQuickView(book)}>
+                <button key={book.id} className="bestseller-row" onClick={() => setLocation(getBookDetailPath(book))}>
                   <span className="bestseller-row__number">0{index + 1}</span>
                   <BookCover book={book} compact />
                   <div className="bestseller-row__title"><p>{book.category}</p><h3>{book.title}</h3><span>{book.author}</span></div>
@@ -351,7 +354,7 @@ export default function Home() {
         <section id="arrivals" className="section arrivals-section">
           <SectionHeading eyebrow="Fresh off the press" title="New arrivals." linkLabel="See all new books" onLink={() => { setActiveCategory("All"); setSearchQuery(""); scrollTo("catalogue"); }} />
           <div className="arrival-grid">
-            {books.filter(book => book.arrival).slice(0, 6).map(book => <ProductCard key={book.id} book={book} isWishlisted={wishlist.includes(book.id)} onToggleWish={toggleWish} onAdd={addToBag} onQuickView={setQuickView} />)}
+            {books.filter(book => book.arrival).slice(0, 6).map(book => <ProductCard key={book.id} book={book} isWishlisted={wishlist.includes(book.id)} onToggleWish={toggleWish} onAdd={addToBag} onQuickView={setQuickView} onDetails={book => setLocation(getBookDetailPath(book))} />)}
           </div>
         </section>
 
