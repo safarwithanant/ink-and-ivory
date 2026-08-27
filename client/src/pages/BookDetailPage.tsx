@@ -45,7 +45,7 @@ export default function BookDetailPage() {
   };
 
   return <div className="book-detail-page">
-    <header className="book-detail-header"><button className="brand" onClick={() => setLocation("/")} aria-label="Return to INK & IVORY home"><span className="brand__mark"><BookOpen size={17} /></span><span>INK <i>&</i> IVORY</span></button><div><button onClick={() => setLocation(`/category/${categoryToSlug(book.category)}`)}>{book.category}</button><span><Heart size={16} /> {wishlist.length}</span><span><ShoppingBag size={16} /> {bagCount}</span></div></header>
+    <header className="book-detail-header"><button className="brand" onClick={() => setLocation("/")} aria-label="Return to INK & IVORY home"><span className="brand__mark"><BookOpen size={17} /></span><span>INK <i>&</i> IVORY</span></button><div><button onClick={() => setLocation(`/category/${categoryToSlug(book.category)}`)}>{book.category}</button><span><Heart size={16} /> {wishlist.length}</span><button onClick={() => setLocation("/cart")}><ShoppingBag size={16} /> {bagCount}</button></div></header>
     <main>
       <section className="book-detail-hero">
         <button className="book-back" onClick={() => setLocation(`/category/${categoryToSlug(book.category)}`)}><ArrowLeft size={16} /> Back to {book.category}</button>

@@ -30,3 +30,10 @@
 - [x] Add route and related-book selection tests, then verify book-detail pages on desktop and mobile.
 - [x] Add focused test coverage that valid and invalid book-detail URLs resolve to the expected page state.
 - [x] Add rendered UI route-state tests for valid and invalid book-detail URLs.
+- [x] Reset scroll position on every page navigation so routed category and book pages open at the top.
+- [x] Upgrade the storefront with secure payment infrastructure and define validated server-side checkout inputs.
+- [x] Create a full cart page with quantity changes, removal, totals, empty state, and checkout entry point.
+- [x] Implement secure payment checkout with server-created payment sessions and success/cancel return states.
+- [x] Add automated coverage and desktop/mobile verification for scroll restoration, cart behavior, and checkout state handling.
+- [x] Add rendered route-state tests for checkout success and cancellation pages.
+- [x] Add UI-level coverage confirming route navigation restores the page to the top.

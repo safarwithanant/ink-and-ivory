@@ -1,12 +1,15 @@
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/NotFound";
-import { Route, Switch } from "wouter";
+import { Route, Switch, useLocation } from "wouter";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import BookDetailPage from "./pages/BookDetailPage";
+import CartPage from "./pages/CartPage";
 import CategoryPage from "./pages/CategoryPage";
+import CheckoutResultPage from "./pages/CheckoutResultPage";
 import Home from "./pages/Home";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 function Router() {
   // make sure to consider if you need authentication for certain routes
@@ -15,6 +18,8 @@ function Router() {
       <Route path={"/"} component={Home} />
       <Route path={"/category/:slug"} component={CategoryPage} />
       <Route path={"/book/:id"} component={BookDetailPage} />
+      <Route path={"/cart"} component={CartPage} />
+      <Route path={"/checkout/:status"} component={CheckoutResultPage} />
       <Route path={"/404"} component={NotFound} />
       {/* Final fallback route */}
       <Route component={NotFound} />
@@ -35,6 +40,7 @@ function App() {
         // switchable
       >
         <TooltipProvider>
+          <ScrollToTop />
           <Toaster />
           <Router />
         </TooltipProvider>

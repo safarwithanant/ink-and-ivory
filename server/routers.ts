@@ -1,5 +1,6 @@
 import { COOKIE_NAME } from "@shared/const";
 import { getSessionCookieOptions } from "./_core/cookies";
+import { checkoutRouter } from "./checkoutRouter";
 import { systemRouter } from "./_core/systemRouter";
 import { publicProcedure, router } from "./_core/trpc";
 
@@ -16,6 +17,7 @@ export const appRouter = router({
       } as const;
     }),
   }),
+  checkout: checkoutRouter,
 
   // TODO: add feature routers here, e.g.
   // todo: router({

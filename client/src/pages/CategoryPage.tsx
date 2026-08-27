@@ -63,7 +63,7 @@ export default function CategoryPage() {
     <div className="category-page">
       <header className="category-page__header">
         <button className="brand" onClick={() => setLocation("/")} aria-label="Return to INK & IVORY home"><span className="brand__mark"><BookOpen size={17} /></span><span>INK <i>&</i> IVORY</span></button>
-        <div className="category-page__controls"><span><Heart size={17} /> {wishlist.length}</span><span><ShoppingBag size={17} /> {bagCount}</span></div>
+        <div className="category-page__controls"><span><Heart size={17} /> {wishlist.length}</span><button onClick={() => setLocation("/cart")}><ShoppingBag size={17} /> {bagCount}</button></div>
       </header>
       <main>
         <section className="category-hero">

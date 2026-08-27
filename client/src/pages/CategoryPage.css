@@ -1,7 +1,7 @@
 .category-page { min-height: 100vh; color: var(--ink); background: #f7f1e6; }
 .category-page__header { height: 76px; display: flex; align-items: center; justify-content: space-between; padding: 0 clamp(21px, 5vw, 86px); border-bottom: 1px solid var(--line); background: rgba(247, 241, 230, .95); }
 .category-page__controls { display: flex; gap: 17px; color: var(--red); font: 600 13px var(--sans); }
-.category-page__controls span { display: inline-flex; align-items: center; gap: 6px; }
+.category-page__controls span, .category-page__controls button { display: inline-flex; align-items: center; gap: 6px; padding: 0; border: 0; color: inherit; background: transparent; font: inherit; }
 .category-hero { position: relative; min-height: 375px; display: flex; flex-direction: column; justify-content: end; overflow: hidden; padding: 65px clamp(21px, 9vw, 155px); color: var(--paper); background: var(--ink); }
 .category-hero::before { content: ""; position: absolute; inset: 0 0 0 auto; width: min(54vw, 730px); opacity: .53; background: linear-gradient(90deg, rgba(22,20,18,.95), rgba(22,20,18,.09)), url('/manus-storage/ink-ivory-discovery_870c035a.jpg') center/cover; }
 .category-hero > * { position: relative; z-index: 1; }
