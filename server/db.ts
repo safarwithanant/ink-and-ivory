@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/mysql2";
 import { TRPCError } from "@trpc/server";
-import { InsertShippingAddress, InsertUser, shippingAddresses, users } from "../drizzle/schema";
+import { InsertShippingAddress, InsertUser, orderItems, orders, savedBooks, shippingAddresses, users } from "../drizzle/schema";
 import { ENV } from './_core/env';
 
 let _db: ReturnType<typeof drizzle> | null = null;
@@ -144,4 +144,53 @@ export async function setDefaultShippingAddress(userId: number, addressId: numbe
     await tx.update(shippingAddresses).set({ isDefault: false }).where(eq(shippingAddresses.userId, userId));
     await tx.update(shippingAddresses).set({ isDefault: true }).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId)));
   });
+}
+
+export async function getDefaultShippingAddress(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const [address] = await db.select().from(shippingAddresses).where(and(eq(shippingAddresses.userId, userId), eq(shippingAddresses.isDefault, true))).limit(1);
+  return address;
+}
+
+export async function recordCompletedOrder(input: { userId: number; stripeCheckoutSessionId: string; stripePaymentIntentId?: string | null; shippingAddressId?: number | null; items: Array<{ bookId: string; quantity: number }> }) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.transaction(async tx => {
+    const [existing] = await tx.select({ id: orders.id }).from(orders).where(eq(orders.stripeCheckoutSessionId, input.stripeCheckoutSessionId)).limit(1);
+    if (existing) return;
+    await tx.insert(orders).values({ userId: input.userId, stripeCheckoutSessionId: input.stripeCheckoutSessionId, stripePaymentIntentId: input.stripePaymentIntentId || null, shippingAddressId: input.shippingAddressId || null });
+    const [created] = await tx.select({ id: orders.id }).from(orders).where(eq(orders.stripeCheckoutSessionId, input.stripeCheckoutSessionId)).limit(1);
+    if (created && input.items.length) await tx.insert(orderItems).values(input.items.map(item => ({ orderId: created.id, ...item })));
+  });
+}
+
+export async function listOrdersForUser(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  const rows = await db.select({ order: orders, item: orderItems }).from(orders).leftJoin(orderItems, eq(orderItems.orderId, orders.id)).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+  const grouped = new Map<number, { id: number; fulfillmentStatus: "processing" | "packed" | "shipped" | "delivered" | "cancelled"; createdAt: Date; items: Array<{ bookId: string; quantity: number }> }>();
+  rows.forEach(({ order, item }) => {
+    if (!grouped.has(order.id)) grouped.set(order.id, { id: order.id, fulfillmentStatus: order.fulfillmentStatus, createdAt: order.createdAt, items: [] });
+    if (item) grouped.get(order.id)?.items.push({ bookId: item.bookId, quantity: item.quantity });
+  });
+  return Array.from(grouped.values());
+}
+
+export async function listSavedBooks(userId: number) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  return db.select().from(savedBooks).where(eq(savedBooks.userId, userId)).orderBy(desc(savedBooks.createdAt));
+}
+
+export async function saveBook(userId: number, bookId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.insert(savedBooks).values({ userId, bookId }).onDuplicateKeyUpdate({ set: { bookId } });
+}
+
+export async function removeSavedBook(userId: number, bookId: string) {
+  const db = await getDb();
+  if (!db) throw new Error("Database is unavailable.");
+  await db.delete(savedBooks).where(and(eq(savedBooks.userId, userId), eq(savedBooks.bookId, bookId)));
 }

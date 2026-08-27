@@ -1,4 +1,4 @@
-import { boolean, index, int, mysqlEnum, mysqlTable, text, timestamp, varchar } from "drizzle-orm/mysql-core";
+import { boolean, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
 
 /**
  * Core user table backing auth flow.
@@ -47,3 +47,35 @@ export const shippingAddresses = mysqlTable("shipping_addresses", {
 
 export type ShippingAddress = typeof shippingAddresses.$inferSelect;
 export type InsertShippingAddress = typeof shippingAddresses.$inferInsert;
+
+/** Minimal fulfilment records: Stripe remains the payment source of truth. */
+export const orders = mysqlTable("orders", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  stripeCheckoutSessionId: varchar("stripeCheckoutSessionId", { length: 255 }).notNull().unique(),
+  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
+  shippingAddressId: int("shippingAddressId"),
+  fulfillmentStatus: mysqlEnum("fulfillmentStatus", ["processing", "packed", "shipped", "delivered", "cancelled"]).notNull().default("processing"),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
+}, table => [index("orders_user_idx").on(table.userId)]);
+
+/** A local order item only references a catalog book and its selected quantity. */
+export const orderItems = mysqlTable("order_items", {
+  id: int("id").autoincrement().primaryKey(),
+  orderId: int("orderId").notNull(),
+  bookId: varchar("bookId", { length: 128 }).notNull(),
+  quantity: int("quantity").notNull(),
+}, table => [index("order_items_order_idx").on(table.orderId)]);
+
+/** A customer-owned reading list. */
+export const savedBooks = mysqlTable("saved_books", {
+  id: int("id").autoincrement().primaryKey(),
+  userId: int("userId").notNull(),
+  bookId: varchar("bookId", { length: 128 }).notNull(),
+  createdAt: timestamp("createdAt").defaultNow().notNull(),
+}, table => [uniqueIndex("saved_books_user_book_idx").on(table.userId, table.bookId), index("saved_books_user_idx").on(table.userId)]);
+
+export type Order = typeof orders.$inferSelect;
+export type OrderItem = typeof orderItems.$inferSelect;
+export type SavedBook = typeof savedBooks.$inferSelect;

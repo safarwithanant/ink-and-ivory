@@ -1,5 +1,7 @@
 import express, { type Express, type Request, type Response } from "express";
 import Stripe from "stripe";
+import { recordCompletedOrder } from "./db";
+import { decodePurchasedBooks } from "./orderUtils";
 
 let stripeClient: Stripe | null = null;
 
@@ -39,6 +41,17 @@ export function registerStripeWebhook(app: Express) {
 
     if (event.type === "checkout.session.completed") {
       const session = event.data.object as Stripe.Checkout.Session;
+      const userId = Number(session.metadata?.user_id || session.client_reference_id);
+      const shippingAddressId = Number(session.metadata?.shipping_address_id) || undefined;
+      if (Number.isInteger(userId) && userId > 0) {
+        await recordCompletedOrder({
+          userId,
+          stripeCheckoutSessionId: session.id,
+          stripePaymentIntentId: typeof session.payment_intent === "string" ? session.payment_intent : session.payment_intent?.id,
+          shippingAddressId,
+          items: decodePurchasedBooks(session.metadata?.cart_items),
+        });
+      }
       console.log("[Stripe webhook] Checkout completed", { eventId: event.id, sessionId: session.id, customerId: session.customer, userId: session.metadata?.user_id });
     }
 

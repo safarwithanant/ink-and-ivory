@@ -11,7 +11,7 @@ vi.mock("@/_core/hooks/useAuth", () => ({ useAuth: () => mocks.auth }));
 vi.mock("@/lib/trpc", () => {
   const mutation = () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false });
   const query = () => ({ data: [], isLoading: false, isError: false, error: null, refetch: vi.fn() });
-  return { trpc: { useUtils: () => ({ profile: { addresses: { invalidate: vi.fn() }, paymentMethods: { invalidate: vi.fn() } } }), profile: { addresses: { useQuery: query }, paymentMethods: { useQuery: query }, addAddress: { useMutation: mutation }, updateAddress: { useMutation: mutation }, removeAddress: { useMutation: mutation }, setDefaultAddress: { useMutation: mutation }, setDefaultPaymentMethod: { useMutation: mutation }, removePaymentMethod: { useMutation: mutation }, createPaymentPortal: { useMutation: mutation } } } };
+  return { trpc: { useUtils: () => ({ profile: { addresses: { invalidate: vi.fn() }, paymentMethods: { invalidate: vi.fn() }, savedBooks: { invalidate: vi.fn() } } }), profile: { addresses: { useQuery: query }, paymentMethods: { useQuery: query }, orders: { useQuery: query }, savedBooks: { useQuery: query }, addAddress: { useMutation: mutation }, updateAddress: { useMutation: mutation }, removeAddress: { useMutation: mutation }, setDefaultAddress: { useMutation: mutation }, setDefaultPaymentMethod: { useMutation: mutation }, removePaymentMethod: { useMutation: mutation }, removeSavedBook: { useMutation: mutation }, createPaymentPortal: { useMutation: mutation } } } };
 });
 
 import ProfilePage from "../client/src/pages/ProfilePage";

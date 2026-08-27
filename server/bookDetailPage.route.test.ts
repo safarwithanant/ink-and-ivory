@@ -1,7 +1,16 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { Router } from "wouter";
+
+vi.mock("@/_core/hooks/useAuth", () => ({
+  useAuth: () => ({ user: null, loading: false, error: null, isAuthenticated: false, logout: vi.fn() }),
+}));
+vi.mock("@/lib/trpc", () => {
+  const mutation = () => ({ mutate: vi.fn(), mutateAsync: vi.fn(), isPending: false });
+  return { trpc: { useUtils: () => ({ profile: { savedBooks: { invalidate: vi.fn() } } }), profile: { savedBooks: { useQuery: () => ({ data: [], isLoading: false, isError: false, error: null }) }, saveBook: { useMutation: mutation }, removeSavedBook: { useMutation: mutation } } } };
+});
+
 import BookDetailPage from "../client/src/pages/BookDetailPage";
 
 function renderBookDetailAt(path: string) {

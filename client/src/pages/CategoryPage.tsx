@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useState, type CSSProperties } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { ArrowLeft, ArrowRight, BookOpen, Heart, Search, ShoppingBag, X } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation, useRoute } from "wouter";
 import "./CategoryPage.css";
 import { books, categoryMeta, categoryToSlug, filterCategoryBooks, formatPrice, getBookDetailPath, getCategoryFromSlug, type Book } from "@/data/catalog";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 
 function CategoryBookCover({ book }: { book: Book }) {
   const [base, accent, ink] = book.cover.palette;
@@ -26,6 +28,12 @@ export default function CategoryPage() {
   const [cart, setCart] = useState<Record<string, number>>({});
   const [wishlist, setWishlist] = useState<string[]>([]);
   const [hydrated, setHydrated] = useState(false);
+  const wishlistSynced = useRef(false);
+  const { isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
+  const profileSavedBooks = trpc.profile.savedBooks.useQuery(undefined, { enabled: isAuthenticated });
+  const saveProfileBook = trpc.profile.saveBook.useMutation({ onSuccess: () => utils.profile.savedBooks.invalidate() });
+  const removeProfileBook = trpc.profile.removeSavedBook.useMutation({ onSuccess: () => utils.profile.savedBooks.invalidate() });
 
   useEffect(() => {
     try {
@@ -38,6 +46,14 @@ export default function CategoryPage() {
 
   useEffect(() => { if (hydrated) localStorage.setItem("ink-and-ivory-bag", JSON.stringify(cart)); }, [cart, hydrated]);
   useEffect(() => { if (hydrated) localStorage.setItem("ink-and-ivory-wishlist", JSON.stringify(wishlist)); }, [wishlist, hydrated]);
+  useEffect(() => {
+    if (!isAuthenticated || !hydrated || !profileSavedBooks.data || wishlistSynced.current) return;
+    wishlistSynced.current = true;
+    const remoteIds = profileSavedBooks.data.map(saved => saved.bookId);
+    const localOnly = wishlist.filter(bookId => !remoteIds.includes(bookId));
+    setWishlist(Array.from(new Set([...remoteIds, ...wishlist])));
+    if (localOnly.length) Promise.all(localOnly.map(bookId => saveProfileBook.mutateAsync({ bookId }))).then(() => utils.profile.savedBooks.invalidate()).catch(() => toast.error("Your local wishlist could not be synced yet."));
+  }, [hydrated, isAuthenticated, profileSavedBooks.data, saveProfileBook, utils.profile.savedBooks, wishlist]);
 
   const categoryBooks = useMemo(() => books.filter(book => book.category === category), [category]);
   const visibleBooks = useMemo(() => category ? filterCategoryBooks(category, query) : [], [category, query]);
@@ -48,9 +64,18 @@ export default function CategoryPage() {
     toast.success(`${book.title} is now in your bag.`);
   };
 
-  const toggleWishlist = (book: Book) => {
+  const toggleWishlist = async (book: Book) => {
     const saved = wishlist.includes(book.id);
     setWishlist(current => saved ? current.filter(id => id !== book.id) : [...current, book.id]);
+    if (isAuthenticated) {
+      try {
+        if (saved) await removeProfileBook.mutateAsync({ bookId: book.id }); else await saveProfileBook.mutateAsync({ bookId: book.id });
+      } catch (error) {
+        setWishlist(current => saved ? [...current, book.id] : current.filter(id => id !== book.id));
+        toast.error(error instanceof Error ? error.message : "Your wishlist could not be updated.");
+        return;
+      }
+    }
     toast.success(saved ? `${book.title} was removed from your wishlist.` : `${book.title} was saved to your wishlist.`);
   };
 

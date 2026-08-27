@@ -1,6 +1,9 @@
 import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { getCheckoutProducts } from "./products";
+import { getDefaultShippingAddress } from "./db";
+import { toStripeShippingAddress } from "./checkoutAddress";
+import { createCheckoutSessionParams } from "./checkoutSession";
 import { getStripeClient } from "./stripe";
 import { ensureStripeCustomer } from "./stripeCustomer";
 import { protectedProcedure, router } from "./_core/trpc";
@@ -20,31 +23,13 @@ export const checkoutRouter = router({
     let session;
     try {
       const customerId = await ensureStripeCustomer(ctx.user);
-      session = await getStripeClient().checkout.sessions.create({
-        mode: "payment",
-        client_reference_id: ctx.user.id.toString(),
-        customer: customerId,
-        allow_promotion_codes: true,
-        billing_address_collection: "required",
-        shipping_address_collection: { allowed_countries: ["IN"] },
-        phone_number_collection: { enabled: true },
-        metadata: {
-          user_id: ctx.user.id.toString(),
-          customer_email: ctx.user.email || "",
-          customer_name: ctx.user.name || "",
-          cart_item_ids: entries.map(entry => entry.bookId).join(","),
-        },
-        line_items: entries.map(({ product, quantity }) => ({
-          quantity,
-          price_data: {
-            currency: "inr",
-            unit_amount: product.unitAmount,
-            product_data: { name: product.name, description: product.description },
-          },
-        })),
-        success_url: `${origin}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${origin}/checkout/cancel`,
-      });
+      const defaultAddress = await getDefaultShippingAddress(ctx.user.id);
+      if (defaultAddress) {
+        await getStripeClient().customers.update(customerId, {
+          shipping: toStripeShippingAddress(defaultAddress),
+        });
+      }
+      session = await getStripeClient().checkout.sessions.create(createCheckoutSessionParams({ origin, customerId, user: ctx.user, entries, defaultAddressId: defaultAddress?.id }));
     } catch (error) {
       console.error("[Stripe checkout] Session creation failed", error);
       throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to start secure checkout. Please try again." });

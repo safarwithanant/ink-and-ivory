@@ -1,5 +1,6 @@
 import { z } from "zod";
 import * as db from "./db";
+import { getCheckoutProducts } from "./products";
 import { addressInputSchema } from "./profileValidation";
 import { createStripeCustomerPortal, detachStripePaymentMethod, getSafePaymentMethods, setDefaultStripePaymentMethod } from "./stripeCustomer";
 import { protectedProcedure, router } from "./_core/trpc";
@@ -41,5 +42,16 @@ export const profileRouter = router({
   createPaymentPortal: protectedProcedure.mutation(async ({ ctx }) => {
     const session = await createStripeCustomerPortal(ctx.user, `${requestOrigin(ctx.req)}/profile`);
     return { url: session.url };
+  }),
+  orders: protectedProcedure.query(({ ctx }) => db.listOrdersForUser(ctx.user.id)),
+  savedBooks: protectedProcedure.query(({ ctx }) => db.listSavedBooks(ctx.user.id)),
+  saveBook: protectedProcedure.input(z.object({ bookId: z.string().min(1).max(128) })).mutation(async ({ ctx, input }) => {
+    getCheckoutProducts([{ bookId: input.bookId, quantity: 1 }]);
+    await db.saveBook(ctx.user.id, input.bookId);
+    return { success: true } as const;
+  }),
+  removeSavedBook: protectedProcedure.input(z.object({ bookId: z.string().min(1).max(128) })).mutation(async ({ ctx, input }) => {
+    await db.removeSavedBook(ctx.user.id, input.bookId);
+    return { success: true } as const;
   }),
 });

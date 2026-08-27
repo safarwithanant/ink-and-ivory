@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import "./HomeTypography.css";
 import {
   ArrowRight,
@@ -21,6 +21,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import { useLocation } from "wouter";
+import { useAuth } from "@/_core/hooks/useAuth";
+import { trpc } from "@/lib/trpc";
 import {
   books,
   categoryToSlug,
@@ -133,6 +135,12 @@ export default function Home() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [quickView, setQuickView] = useState<Book | null>(null);
   const [hydrated, setHydrated] = useState(false);
+  const wishlistSynced = useRef(false);
+  const { isAuthenticated } = useAuth();
+  const utils = trpc.useUtils();
+  const profileSavedBooks = trpc.profile.savedBooks.useQuery(undefined, { enabled: isAuthenticated });
+  const saveProfileBook = trpc.profile.saveBook.useMutation({ onSuccess: () => utils.profile.savedBooks.invalidate() });
+  const removeProfileBook = trpc.profile.removeSavedBook.useMutation({ onSuccess: () => utils.profile.savedBooks.invalidate() });
   const [, setLocation] = useLocation();
 
   useEffect(() => {
@@ -156,6 +164,15 @@ export default function Home() {
   useEffect(() => {
     if (hydrated) localStorage.setItem("ink-and-ivory-wishlist", JSON.stringify(wishlist));
   }, [wishlist, hydrated]);
+
+  useEffect(() => {
+    if (!isAuthenticated || !hydrated || !profileSavedBooks.data || wishlistSynced.current) return;
+    wishlistSynced.current = true;
+    const remoteIds = profileSavedBooks.data.map(saved => saved.bookId);
+    const localOnly = wishlist.filter(bookId => !remoteIds.includes(bookId));
+    setWishlist(Array.from(new Set([...remoteIds, ...wishlist])));
+    if (localOnly.length) Promise.all(localOnly.map(bookId => saveProfileBook.mutateAsync({ bookId }))).then(() => utils.profile.savedBooks.invalidate()).catch(() => toast.error("Your local wishlist could not be synced yet."));
+  }, [hydrated, isAuthenticated, profileSavedBooks.data, saveProfileBook, utils.profile.savedBooks, wishlist]);
 
   useEffect(() => {
     if (hydrated) localStorage.setItem("ink-and-ivory-recent-searches", JSON.stringify(recentSearches));
@@ -218,9 +235,18 @@ export default function Home() {
     toast.message(`${book.title} was removed from your bag.`);
   };
 
-  const toggleWish = (book: Book) => {
+  const toggleWish = async (book: Book) => {
     const saved = wishlist.includes(book.id);
     setWishlist(current => (saved ? current.filter(id => id !== book.id) : [...current, book.id]));
+    if (isAuthenticated) {
+      try {
+        if (saved) await removeProfileBook.mutateAsync({ bookId: book.id }); else await saveProfileBook.mutateAsync({ bookId: book.id });
+      } catch (error) {
+        setWishlist(current => saved ? [...current, book.id] : current.filter(id => id !== book.id));
+        toast.error(error instanceof Error ? error.message : "Your wishlist could not be updated.");
+        return;
+      }
+    }
     toast.success(saved ? `${book.title} was removed from your wishlist.` : `${book.title} was saved to your wishlist.`);
   };
 
@@ -406,7 +432,7 @@ export default function Home() {
         <div className="site-footer__bottom"><p>© 2026 Ink & Ivory. Made for the reading life.</p><div className="social-links"><button aria-label="Instagram"><Instagram size={17} /></button><button aria-label="Facebook"><Facebook size={17} /></button><button aria-label="Pinterest"><span className="social-letter">P</span></button></div><p>UPI &nbsp; • &nbsp; VISA &nbsp; • &nbsp; MASTERCARD</p></div>
       </footer>
 
-      {menuOpen && <div className="modal-backdrop modal-backdrop--menu" onMouseDown={() => setMenuOpen(false)}><aside className="mobile-menu" onMouseDown={event => event.stopPropagation()}><div className="drawer__head"><button className="brand" onClick={() => scrollTo("top")}><span>INK <i>&</i> IVORY</span></button><button className="icon-button" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X /></button></div><nav>{navItems.map(([label, id], index) => <button onClick={() => scrollTo(id)} key={id}><span>0{index + 1}</span>{label}<ArrowUpRight size={18} /></button>)}</nav><div className="mobile-menu__footer"><button onClick={() => { setMenuOpen(false); setSearchOpen(true); }}><Search size={17} /> Search the shelves</button><button onClick={() => { setMenuOpen(false); setLocation("/profile"); }}><UserRound size={17} /> Your profile</button><button onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={17} /> Wishlist ({wishlist.length})</button></div></aside></div>}
+      {menuOpen && <div className="modal-backdrop modal-backdrop--menu" onMouseDown={() => setMenuOpen(false)}><aside className="mobile-menu" onMouseDown={event => event.stopPropagation()}><div className="drawer__head"><button className="brand" onClick={() => scrollTo("top")}><span>INK <i>&</i> IVORY</span></button><button className="icon-button" onClick={() => setMenuOpen(false)} aria-label="Close menu"><X /></button></div><nav>{navItems.map(([label, id], index) => <button onClick={() => scrollTo(id)} key={id}><span className="mobile-menu__item"><small>0{index + 1}</small><b>{label}</b></span><ArrowUpRight size={18} /></button>)}</nav><div className="mobile-menu__footer"><button onClick={() => { setMenuOpen(false); setSearchOpen(true); }}><Search size={17} /> Search the shelves</button><button onClick={() => { setMenuOpen(false); setLocation("/profile"); }}><UserRound size={17} /> Your profile</button><button onClick={() => { setMenuOpen(false); setWishlistOpen(true); }}><Heart size={17} /> Wishlist ({wishlist.length})</button></div></aside></div>}
 
       {searchOpen && <div className="modal-backdrop" onMouseDown={closeSearch}><section className="search-modal" onMouseDown={event => event.stopPropagation()} role="dialog" aria-modal="true" aria-label="Search the collection"><div className="drawer__head"><div><p className="eyebrow">Search the shelves</p><h2>What are you looking for?</h2></div><button className="icon-button" onClick={closeSearch} aria-label="Close search"><X /></button></div><div className="search-input"><Search size={20} /><input autoFocus value={searchQuery} onChange={event => setSearchQuery(event.target.value)} onKeyDown={event => { if (event.key === "Enter") rememberSearch(searchQuery); }} placeholder="Title, author, category, ISBN…" /><button onClick={() => setSearchQuery("")} aria-label="Clear search"><X size={16} /></button></div>{!searchQuery && <div className="search-suggestions"><div><p className="eyebrow">Popular searches</p><div className="suggestion-pills">{["Fiction", "Psychology", "Self Development", "Mystery"].map(term => <button onClick={() => selectSearch(term)} key={term}>{term}</button>)}</div>{recentSearches.length > 0 && <div className="recent-searches"><p className="eyebrow">Recent searches</p><div className="suggestion-pills">{recentSearches.map(term => <button onClick={() => selectSearch(term)} key={term}>{term}</button>)}</div></div>}</div><div><p className="eyebrow">Start here</p><div className="suggested-books">{books.slice(0, 3).map(book => <button key={book.id} onClick={() => { setQuickView(book); closeSearch(); }}><BookCover book={book} compact /><span>{book.title}<small>{book.author}</small></span><ArrowUpRight size={17} /></button>)}</div></div></div>}{searchQuery && <div className="search-results"><p className="eyebrow">{matchingBooks.length} {matchingBooks.length === 1 ? "book" : "books"} found</p>{matchingBooks.length ? matchingBooks.map(book => <button key={book.id} onClick={() => { setQuickView(book); closeSearch(); }}><BookCover book={book} compact /><span><small>{book.category}</small>{book.title}<em>{book.author}</em></span><ArrowUpRight size={18} /></button>) : <p className="search-results__empty">No book came to mind. Try a title, author, or category.</p>}</div>}</section></div>}
 

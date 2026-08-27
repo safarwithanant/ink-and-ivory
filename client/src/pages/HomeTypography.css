@@ -57,6 +57,11 @@
   .category-card--2:hover::after, .category-card--5:hover::after { background: #dbc8a6 !important; }
   .category-card--3:hover::after, .category-card--7:hover::after { background: #64313a !important; transform: rotate(25deg) !important; }
   .category-card--4:hover::after, .category-card--8:hover::after { background: #b0b9ae !important; transform: rotate(40deg) !important; }
+  .mobile-menu nav button { grid-template-columns: minmax(0, 1fr) 24px !important; column-gap: 16px !important; }
+  .mobile-menu nav button .mobile-menu__item { display: grid !important; grid-template-columns: 28px minmax(0, 1fr); align-items: center; min-width: 0; }
+  .mobile-menu nav button .mobile-menu__item small { display: block; color: rgba(244,239,228,.52); font: 600 10px/1 var(--sans); letter-spacing: .08em; }
+  .mobile-menu nav button .mobile-menu__item b { display: block; min-width: 0; color: inherit; font: inherit; font-weight: inherit; line-height: 1.06; }
+  .mobile-menu nav button > svg { grid-column: 2; justify-self: end; align-self: center; }
 }
 
 /* Full-bleed hero composition with an editorial veil for readable headline contrast. */

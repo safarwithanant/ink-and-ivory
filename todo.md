@@ -45,3 +45,13 @@
 - [x] Return an explicit authorization or not-found result when an address mutation targets a missing or unowned address.
 - [x] Add visible profile query errors and mutation success/error feedback for address and payment-method management.
 - [x] Add rendered profile route-state and profile-navigation target tests.
+- [x] Fix the mobile-menu arrow alignment so long navigation labels cannot overlap or collapse against the arrow.
+- [x] Add minimal order, order-item, and saved-book data structures that retain only required purchase and fulfillment information.
+- [x] Capture completed Stripe checkout sessions through verified webhooks and present a protected order-history and fulfillment-status view.
+- [x] Automatically prefill Stripe Checkout with the customer’s default saved shipping address.
+- [x] Extend saved books into a protected profile wishlist that supports removing titles and opening book details.
+- [x] Add automated coverage and desktop/mobile verification for navigation arrows, order history, checkout prefill, and saved books.
+- [x] Wrap mobile navigation index and label content so long labels and arrows occupy explicit non-overlapping grid cells, and cover the rendered layout structure.
+- [x] Add checkout-session and populated order-history/saved-book rendered state coverage.
+- [x] Verify the new profile tabs and saved-book/order-history presentation at a desktop breakpoint.
+- [x] Capture and review the order-history and saved-books profile tabs at desktop width.
