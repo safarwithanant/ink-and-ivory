@@ -53,6 +53,7 @@ function BookCover({ book, compact = false }: { book: Book; compact?: boolean })
 function SectionHeading({ eyebrow, title, linkLabel, onLink }: { eyebrow: string; title: string; linkLabel?: string; onLink?: () => void }) {
   return (
     <div className="section-heading">
+      <span className="section-heading__particle" aria-hidden="true"><BookOpen size={16} /><i>✦</i></span>
       <div>
         <span className="section-heading__mark">EX LIBRIS <b>✦</b> INK &amp; IVORY</span>
         <p className="eyebrow">{eyebrow}</p>
@@ -265,6 +266,8 @@ export default function Home() {
 
       <main id="top">
         <section className="hero">
+          <span className="hero__particle hero__particle--book" aria-hidden="true"><BookOpen size={23} /></span>
+          <span className="hero__particle hero__particle--star" aria-hidden="true">✦</span>
           <div className="hero__lead">
             <p className="eyebrow"><span className="eyebrow__dot" /> Independent booksellers, Mumbai</p>
             <h1>Stories<br /><em>worth</em> keeping.</h1>

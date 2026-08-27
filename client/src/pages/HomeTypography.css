@@ -33,4 +33,59 @@
 
   .product-card__author { min-height: 0 !important; }
   .book-cover__copy span { font-size: 18px !important; }
+
+  .bestseller-row {
+    grid-template-columns: 62px minmax(0, 1fr) auto 28px !important;
+    gap: 14px !important;
+    padding: 18px 0 !important;
+  }
+
+  .bestseller-row .book-cover {
+    width: 60px !important;
+    flex-basis: 60px !important;
+  }
+
+  .bestseller-row__title { min-width: 0; }
+  .bestseller-row__title h3 { margin: 0 0 5px !important; font-size: 21px !important; line-height: 1.03 !important; }
+  .bestseller-row__title span { display: block; font: 400 13px/1.35 var(--body) !important; }
+  .bestseller-row__price { display: block !important; font: 600 12px var(--sans) !important; white-space: nowrap; }
+  .bestseller-row__arrow { grid-column: auto !important; align-self: center; }
+}
+
+/* Full-bleed hero composition with an editorial veil for readable headline contrast. */
+.hero {
+  position: relative;
+  grid-template-columns: minmax(0, 1fr) !important;
+  isolation: isolate;
+  background-image: linear-gradient(90deg, rgba(13, 12, 11, .91) 0%, rgba(13, 12, 11, .74) 38%, rgba(13, 12, 11, .22) 71%, rgba(13, 12, 11, .08) 100%), url('/manus-storage/ink-ivory-hero_707437ca.jpg') !important;
+  background-position: center, center 50% !important;
+  background-size: cover, cover !important;
+}
+
+.hero__image-wrap { display: none !important; }
+.hero__lead { z-index: 1; max-width: 710px; min-height: 650px; }
+.hero__particle { position: absolute; z-index: 2; display: grid; place-items: center; width: 42px; height: 42px; border: 1px solid rgba(240, 221, 183, .52); color: #dfba71; background: rgba(30, 17, 17, .30); backdrop-filter: blur(2px); pointer-events: none; }
+.hero__particle--book { right: 9%; bottom: 13%; transform: rotate(-10deg); }
+.hero__particle--star { top: 14%; right: 18%; width: 28px; height: 28px; border: 0; background: transparent; font: 20px var(--serif); }
+
+/* Repeating visual footnotes: quiet bookish markers rather than distracting UI. */
+.section-heading { position: relative; }
+.section-heading__particle { position: absolute; right: 0; top: -5px; display: inline-flex; align-items: center; gap: 5px; color: var(--gold); opacity: .82; pointer-events: none; }
+.section-heading__particle i { font: 13px var(--serif); }
+.category-section::before, .catalogue-section::before, .arrivals-section::before, .journal-section::before, .reading-paths::before, .newsletter-section::before { content: ""; position: absolute; z-index: 0; width: 54px; height: 38px; border: 1px solid currentColor; opacity: .14; pointer-events: none; }
+.category-section::before { top: 17%; right: 5%; color: var(--red); border-radius: 2px 18px 2px 18px; transform: rotate(-17deg); }
+.catalogue-section::before { right: 2.4%; bottom: 19%; color: var(--gold); border-radius: 20px 2px 20px 2px; transform: rotate(16deg); }
+.arrivals-section::before { top: 13%; left: 5%; color: var(--red); border-radius: 16px 2px 16px 2px; transform: rotate(31deg); }
+.journal-section::before { right: 4%; top: 16%; color: var(--red); border-radius: 2px 14px 2px 14px; transform: rotate(-25deg); }
+.reading-paths::before { right: 5%; bottom: 13%; color: #f2ddae; border-radius: 14px 2px 14px 2px; transform: rotate(20deg); }
+.newsletter-section::before { left: 4%; top: 15%; z-index: 1; color: #eccb85; border-radius: 2px 15px 2px 15px; transform: rotate(-21deg); }
+.category-section, .catalogue-section, .arrivals-section, .journal-section, .reading-paths, .newsletter-section { position: relative; }
+.category-section > *, .catalogue-section > *, .arrivals-section > *, .journal-section > *, .reading-paths > *, .newsletter-section > * { position: relative; z-index: 1; }
+@media (max-width: 760px) {
+  .hero { background-image: linear-gradient(90deg, rgba(13, 12, 11, .91) 0%, rgba(13, 12, 11, .58) 100%), url('/manus-storage/ink-ivory-hero_707437ca.jpg') !important; background-position: center, 62% center !important; }
+  .hero__lead { min-height: 545px; }
+  .hero__particle--book { right: 7%; bottom: 8%; }
+  .hero__particle--star { right: 21%; top: 13%; }
+  .section-heading__particle { top: -1px; }
+  .category-section::before, .catalogue-section::before, .arrivals-section::before, .journal-section::before, .reading-paths::before, .newsletter-section::before { width: 36px; height: 26px; }
 }

@@ -14,3 +14,7 @@
 - [x] Persist and display recent searches alongside popular search suggestions.
 - [x] Replace the excessively tiny utility and paragraph typography with a more legible supporting type scale, and remove unnecessary microcopy across the homepage.
 - [x] Remove residual 8–11px mobile overrides and verify the revised supporting typography at desktop and mobile breakpoints.
+- [x] Fix mobile book-list row overlap so compact covers, titles, authors, prices, and actions maintain clear spacing.
+- [x] Extend the editorial hero photograph across the full hero background while preserving readable headline contrast.
+- [x] Add restrained book-themed decorative motifs across the homepage without competing with content or accessibility.
+- [x] Keep prices visible and clearly spaced in the repaired mobile bestseller rows.
