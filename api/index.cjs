@@ -1,6 +1,40 @@
+"use strict";
+var __create = Object.create;
+var __defProp = Object.defineProperty;
+var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __getProtoOf = Object.getPrototypeOf;
+var __hasOwnProp = Object.prototype.hasOwnProperty;
+var __export = (target, all) => {
+  for (var name in all)
+    __defProp(target, name, { get: all[name], enumerable: true });
+};
+var __copyProps = (to, from, except, desc2) => {
+  if (from && typeof from === "object" || typeof from === "function") {
+    for (let key of __getOwnPropNames(from))
+      if (!__hasOwnProp.call(to, key) && key !== except)
+        __defProp(to, key, { get: () => from[key], enumerable: !(desc2 = __getOwnPropDesc(from, key)) || desc2.enumerable });
+  }
+  return to;
+};
+var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+  // If the importer is in node compatibility mode or this is not an ESM
+  // file that has been converted to a CommonJS file using a Babel-
+  // compatible transform (i.e. "__esModule" has not been set), then set
+  // "default" to the CommonJS "module.exports" for node compatibility.
+  isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target,
+  mod
+));
+var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
+
 // server/app.ts
-import express2 from "express";
-import { createExpressMiddleware } from "@trpc/server/adapters/express";
+var app_exports = {};
+__export(app_exports, {
+  createApp: () => createApp
+});
+module.exports = __toCommonJS(app_exports);
+var import_express2 = __toESM(require("express"), 1);
+var import_express3 = require("@trpc/server/adapters/express");
 
 // shared/const.ts
 var COOKIE_NAME = "app_session_id";
@@ -25,71 +59,71 @@ var decodeOAuthState = (state) => {
 };
 
 // server/_core/oauth.ts
-import { parse as parseCookieHeader2 } from "cookie";
+var import_cookie2 = require("cookie");
 
 // server/db.ts
-import { and, desc, eq } from "drizzle-orm";
-import { drizzle } from "drizzle-orm/mysql2";
-import { TRPCError } from "@trpc/server";
+var import_drizzle_orm = require("drizzle-orm");
+var import_mysql2 = require("drizzle-orm/mysql2");
+var import_server = require("@trpc/server");
 
 // drizzle/schema.ts
-import { boolean, index, int, mysqlEnum, mysqlTable, text, timestamp, uniqueIndex, varchar } from "drizzle-orm/mysql-core";
-var users = mysqlTable("users", {
+var import_mysql_core = require("drizzle-orm/mysql-core");
+var users = (0, import_mysql_core.mysqlTable)("users", {
   /**
    * Surrogate primary key. Auto-incremented numeric value managed by the database.
    * Use this for relations between tables.
    */
-  id: int("id").autoincrement().primaryKey(),
+  id: (0, import_mysql_core.int)("id").autoincrement().primaryKey(),
   /** Manus OAuth identifier (openId) returned from the OAuth callback. Unique per user. */
-  openId: varchar("openId", { length: 64 }).notNull().unique(),
-  name: text("name"),
-  email: varchar("email", { length: 320 }),
-  loginMethod: varchar("loginMethod", { length: 64 }),
+  openId: (0, import_mysql_core.varchar)("openId", { length: 64 }).notNull().unique(),
+  name: (0, import_mysql_core.text)("name"),
+  email: (0, import_mysql_core.varchar)("email", { length: 320 }),
+  loginMethod: (0, import_mysql_core.varchar)("loginMethod", { length: 64 }),
   /** Stripe Customer identifier only. Stripe stores the underlying payment instruments. */
-  stripeCustomerId: varchar("stripeCustomerId", { length: 255 }),
-  role: mysqlEnum("role", ["user", "admin"]).default("user").notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull(),
-  lastSignedIn: timestamp("lastSignedIn").defaultNow().notNull()
+  stripeCustomerId: (0, import_mysql_core.varchar)("stripeCustomerId", { length: 255 }),
+  role: (0, import_mysql_core.mysqlEnum)("role", ["user", "admin"]).default("user").notNull(),
+  createdAt: (0, import_mysql_core.timestamp)("createdAt").defaultNow().notNull(),
+  updatedAt: (0, import_mysql_core.timestamp)("updatedAt").defaultNow().onUpdateNow().notNull(),
+  lastSignedIn: (0, import_mysql_core.timestamp)("lastSignedIn").defaultNow().notNull()
 });
-var shippingAddresses = mysqlTable("shipping_addresses", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  label: varchar("label", { length: 64 }).notNull(),
-  fullName: varchar("fullName", { length: 160 }).notNull(),
-  line1: varchar("line1", { length: 255 }).notNull(),
-  line2: varchar("line2", { length: 255 }),
-  city: varchar("city", { length: 120 }).notNull(),
-  state: varchar("state", { length: 120 }).notNull(),
-  postalCode: varchar("postalCode", { length: 24 }).notNull(),
-  country: varchar("country", { length: 2 }).notNull().default("IN"),
-  phone: varchar("phone", { length: 32 }),
-  isDefault: boolean("isDefault").notNull().default(false),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
-}, (table) => [index("shipping_addresses_user_idx").on(table.userId)]);
-var orders = mysqlTable("orders", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  stripeCheckoutSessionId: varchar("stripeCheckoutSessionId", { length: 255 }).notNull().unique(),
-  stripePaymentIntentId: varchar("stripePaymentIntentId", { length: 255 }),
-  shippingAddressId: int("shippingAddressId"),
-  fulfillmentStatus: mysqlEnum("fulfillmentStatus", ["processing", "packed", "shipped", "delivered", "cancelled"]).notNull().default("processing"),
-  createdAt: timestamp("createdAt").defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt").defaultNow().onUpdateNow().notNull()
-}, (table) => [index("orders_user_idx").on(table.userId)]);
-var orderItems = mysqlTable("order_items", {
-  id: int("id").autoincrement().primaryKey(),
-  orderId: int("orderId").notNull(),
-  bookId: varchar("bookId", { length: 128 }).notNull(),
-  quantity: int("quantity").notNull()
-}, (table) => [index("order_items_order_idx").on(table.orderId)]);
-var savedBooks = mysqlTable("saved_books", {
-  id: int("id").autoincrement().primaryKey(),
-  userId: int("userId").notNull(),
-  bookId: varchar("bookId", { length: 128 }).notNull(),
-  createdAt: timestamp("createdAt").defaultNow().notNull()
-}, (table) => [uniqueIndex("saved_books_user_book_idx").on(table.userId, table.bookId), index("saved_books_user_idx").on(table.userId)]);
+var shippingAddresses = (0, import_mysql_core.mysqlTable)("shipping_addresses", {
+  id: (0, import_mysql_core.int)("id").autoincrement().primaryKey(),
+  userId: (0, import_mysql_core.int)("userId").notNull(),
+  label: (0, import_mysql_core.varchar)("label", { length: 64 }).notNull(),
+  fullName: (0, import_mysql_core.varchar)("fullName", { length: 160 }).notNull(),
+  line1: (0, import_mysql_core.varchar)("line1", { length: 255 }).notNull(),
+  line2: (0, import_mysql_core.varchar)("line2", { length: 255 }),
+  city: (0, import_mysql_core.varchar)("city", { length: 120 }).notNull(),
+  state: (0, import_mysql_core.varchar)("state", { length: 120 }).notNull(),
+  postalCode: (0, import_mysql_core.varchar)("postalCode", { length: 24 }).notNull(),
+  country: (0, import_mysql_core.varchar)("country", { length: 2 }).notNull().default("IN"),
+  phone: (0, import_mysql_core.varchar)("phone", { length: 32 }),
+  isDefault: (0, import_mysql_core.boolean)("isDefault").notNull().default(false),
+  createdAt: (0, import_mysql_core.timestamp)("createdAt").defaultNow().notNull(),
+  updatedAt: (0, import_mysql_core.timestamp)("updatedAt").defaultNow().onUpdateNow().notNull()
+}, (table) => [(0, import_mysql_core.index)("shipping_addresses_user_idx").on(table.userId)]);
+var orders = (0, import_mysql_core.mysqlTable)("orders", {
+  id: (0, import_mysql_core.int)("id").autoincrement().primaryKey(),
+  userId: (0, import_mysql_core.int)("userId").notNull(),
+  stripeCheckoutSessionId: (0, import_mysql_core.varchar)("stripeCheckoutSessionId", { length: 255 }).notNull().unique(),
+  stripePaymentIntentId: (0, import_mysql_core.varchar)("stripePaymentIntentId", { length: 255 }),
+  shippingAddressId: (0, import_mysql_core.int)("shippingAddressId"),
+  fulfillmentStatus: (0, import_mysql_core.mysqlEnum)("fulfillmentStatus", ["processing", "packed", "shipped", "delivered", "cancelled"]).notNull().default("processing"),
+  createdAt: (0, import_mysql_core.timestamp)("createdAt").defaultNow().notNull(),
+  updatedAt: (0, import_mysql_core.timestamp)("updatedAt").defaultNow().onUpdateNow().notNull()
+}, (table) => [(0, import_mysql_core.index)("orders_user_idx").on(table.userId)]);
+var orderItems = (0, import_mysql_core.mysqlTable)("order_items", {
+  id: (0, import_mysql_core.int)("id").autoincrement().primaryKey(),
+  orderId: (0, import_mysql_core.int)("orderId").notNull(),
+  bookId: (0, import_mysql_core.varchar)("bookId", { length: 128 }).notNull(),
+  quantity: (0, import_mysql_core.int)("quantity").notNull()
+}, (table) => [(0, import_mysql_core.index)("order_items_order_idx").on(table.orderId)]);
+var savedBooks = (0, import_mysql_core.mysqlTable)("saved_books", {
+  id: (0, import_mysql_core.int)("id").autoincrement().primaryKey(),
+  userId: (0, import_mysql_core.int)("userId").notNull(),
+  bookId: (0, import_mysql_core.varchar)("bookId", { length: 128 }).notNull(),
+  createdAt: (0, import_mysql_core.timestamp)("createdAt").defaultNow().notNull()
+}, (table) => [(0, import_mysql_core.uniqueIndex)("saved_books_user_book_idx").on(table.userId, table.bookId), (0, import_mysql_core.index)("saved_books_user_idx").on(table.userId)]);
 
 // server/_core/env.ts
 var ENV = {
@@ -108,7 +142,7 @@ var _db = null;
 async function getDb() {
   if (!_db && process.env.DATABASE_URL) {
     try {
-      _db = drizzle(process.env.DATABASE_URL);
+      _db = (0, import_mysql2.drizzle)(process.env.DATABASE_URL);
     } catch (error) {
       console.warn("[Database] Failed to connect:", error);
       _db = null;
@@ -170,25 +204,25 @@ async function getUserByOpenId(openId) {
     console.warn("[Database] Cannot get user: database not available");
     return void 0;
   }
-  const result = await db.select().from(users).where(eq(users.openId, openId)).limit(1);
+  const result = await db.select().from(users).where((0, import_drizzle_orm.eq)(users.openId, openId)).limit(1);
   return result.length > 0 ? result[0] : void 0;
 }
 async function setUserStripeCustomerId(userId, stripeCustomerId) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  await db.update(users).set({ stripeCustomerId }).where(eq(users.id, userId));
+  await db.update(users).set({ stripeCustomerId }).where((0, import_drizzle_orm.eq)(users.id, userId));
 }
 async function listShippingAddresses(userId) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  return db.select().from(shippingAddresses).where(eq(shippingAddresses.userId, userId)).orderBy(desc(shippingAddresses.isDefault), desc(shippingAddresses.updatedAt));
+  return db.select().from(shippingAddresses).where((0, import_drizzle_orm.eq)(shippingAddresses.userId, userId)).orderBy((0, import_drizzle_orm.desc)(shippingAddresses.isDefault), (0, import_drizzle_orm.desc)(shippingAddresses.updatedAt));
 }
 async function assertOwnedShippingAddress(userId, addressId) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  const address = await db.select({ id: shippingAddresses.id }).from(shippingAddresses).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId))).limit(1);
+  const address = await db.select({ id: shippingAddresses.id }).from(shippingAddresses).where((0, import_drizzle_orm.and)((0, import_drizzle_orm.eq)(shippingAddresses.id, addressId), (0, import_drizzle_orm.eq)(shippingAddresses.userId, userId))).limit(1);
   if (!address.length) {
-    throw new TRPCError({ code: "NOT_FOUND", message: "That saved address is unavailable on this profile." });
+    throw new import_server.TRPCError({ code: "NOT_FOUND", message: "That saved address is unavailable on this profile." });
   }
   return db;
 }
@@ -196,51 +230,51 @@ async function createShippingAddress(userId, values) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
   await db.transaction(async (tx) => {
-    const existing = await tx.select({ id: shippingAddresses.id }).from(shippingAddresses).where(eq(shippingAddresses.userId, userId)).limit(1);
+    const existing = await tx.select({ id: shippingAddresses.id }).from(shippingAddresses).where((0, import_drizzle_orm.eq)(shippingAddresses.userId, userId)).limit(1);
     const shouldBeDefault = values.isDefault || existing.length === 0;
-    if (shouldBeDefault) await tx.update(shippingAddresses).set({ isDefault: false }).where(eq(shippingAddresses.userId, userId));
+    if (shouldBeDefault) await tx.update(shippingAddresses).set({ isDefault: false }).where((0, import_drizzle_orm.eq)(shippingAddresses.userId, userId));
     await tx.insert(shippingAddresses).values({ ...values, userId, isDefault: shouldBeDefault });
   });
 }
 async function updateShippingAddress(userId, addressId, values) {
   const db = await assertOwnedShippingAddress(userId, addressId);
   await db.transaction(async (tx) => {
-    if (values.isDefault) await tx.update(shippingAddresses).set({ isDefault: false }).where(eq(shippingAddresses.userId, userId));
-    await tx.update(shippingAddresses).set(values).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId)));
+    if (values.isDefault) await tx.update(shippingAddresses).set({ isDefault: false }).where((0, import_drizzle_orm.eq)(shippingAddresses.userId, userId));
+    await tx.update(shippingAddresses).set(values).where((0, import_drizzle_orm.and)((0, import_drizzle_orm.eq)(shippingAddresses.id, addressId), (0, import_drizzle_orm.eq)(shippingAddresses.userId, userId)));
   });
 }
 async function deleteShippingAddress(userId, addressId) {
   const db = await assertOwnedShippingAddress(userId, addressId);
-  await db.delete(shippingAddresses).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId)));
+  await db.delete(shippingAddresses).where((0, import_drizzle_orm.and)((0, import_drizzle_orm.eq)(shippingAddresses.id, addressId), (0, import_drizzle_orm.eq)(shippingAddresses.userId, userId)));
 }
 async function setDefaultShippingAddress(userId, addressId) {
   const db = await assertOwnedShippingAddress(userId, addressId);
   await db.transaction(async (tx) => {
-    await tx.update(shippingAddresses).set({ isDefault: false }).where(eq(shippingAddresses.userId, userId));
-    await tx.update(shippingAddresses).set({ isDefault: true }).where(and(eq(shippingAddresses.id, addressId), eq(shippingAddresses.userId, userId)));
+    await tx.update(shippingAddresses).set({ isDefault: false }).where((0, import_drizzle_orm.eq)(shippingAddresses.userId, userId));
+    await tx.update(shippingAddresses).set({ isDefault: true }).where((0, import_drizzle_orm.and)((0, import_drizzle_orm.eq)(shippingAddresses.id, addressId), (0, import_drizzle_orm.eq)(shippingAddresses.userId, userId)));
   });
 }
 async function getDefaultShippingAddress(userId) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  const [address] = await db.select().from(shippingAddresses).where(and(eq(shippingAddresses.userId, userId), eq(shippingAddresses.isDefault, true))).limit(1);
+  const [address] = await db.select().from(shippingAddresses).where((0, import_drizzle_orm.and)((0, import_drizzle_orm.eq)(shippingAddresses.userId, userId), (0, import_drizzle_orm.eq)(shippingAddresses.isDefault, true))).limit(1);
   return address;
 }
 async function recordCompletedOrder(input) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
   await db.transaction(async (tx) => {
-    const [existing] = await tx.select({ id: orders.id }).from(orders).where(eq(orders.stripeCheckoutSessionId, input.stripeCheckoutSessionId)).limit(1);
+    const [existing] = await tx.select({ id: orders.id }).from(orders).where((0, import_drizzle_orm.eq)(orders.stripeCheckoutSessionId, input.stripeCheckoutSessionId)).limit(1);
     if (existing) return;
     await tx.insert(orders).values({ userId: input.userId, stripeCheckoutSessionId: input.stripeCheckoutSessionId, stripePaymentIntentId: input.stripePaymentIntentId || null, shippingAddressId: input.shippingAddressId || null });
-    const [created] = await tx.select({ id: orders.id }).from(orders).where(eq(orders.stripeCheckoutSessionId, input.stripeCheckoutSessionId)).limit(1);
+    const [created] = await tx.select({ id: orders.id }).from(orders).where((0, import_drizzle_orm.eq)(orders.stripeCheckoutSessionId, input.stripeCheckoutSessionId)).limit(1);
     if (created && input.items.length) await tx.insert(orderItems).values(input.items.map((item) => ({ orderId: created.id, ...item })));
   });
 }
 async function listOrdersForUser(userId) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  const rows = await db.select({ order: orders, item: orderItems }).from(orders).leftJoin(orderItems, eq(orderItems.orderId, orders.id)).where(eq(orders.userId, userId)).orderBy(desc(orders.createdAt));
+  const rows = await db.select({ order: orders, item: orderItems }).from(orders).leftJoin(orderItems, (0, import_drizzle_orm.eq)(orderItems.orderId, orders.id)).where((0, import_drizzle_orm.eq)(orders.userId, userId)).orderBy((0, import_drizzle_orm.desc)(orders.createdAt));
   const grouped = /* @__PURE__ */ new Map();
   rows.forEach(({ order, item }) => {
     if (!grouped.has(order.id)) grouped.set(order.id, { id: order.id, fulfillmentStatus: order.fulfillmentStatus, createdAt: order.createdAt, items: [] });
@@ -251,7 +285,7 @@ async function listOrdersForUser(userId) {
 async function listSavedBooks(userId) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  return db.select().from(savedBooks).where(eq(savedBooks.userId, userId)).orderBy(desc(savedBooks.createdAt));
+  return db.select().from(savedBooks).where((0, import_drizzle_orm.eq)(savedBooks.userId, userId)).orderBy((0, import_drizzle_orm.desc)(savedBooks.createdAt));
 }
 async function saveBook(userId, bookId) {
   const db = await getDb();
@@ -261,7 +295,7 @@ async function saveBook(userId, bookId) {
 async function removeSavedBook(userId, bookId) {
   const db = await getDb();
   if (!db) throw new Error("Database is unavailable.");
-  await db.delete(savedBooks).where(and(eq(savedBooks.userId, userId), eq(savedBooks.bookId, bookId)));
+  await db.delete(savedBooks).where((0, import_drizzle_orm.and)((0, import_drizzle_orm.eq)(savedBooks.userId, userId), (0, import_drizzle_orm.eq)(savedBooks.bookId, bookId)));
 }
 
 // server/_core/cookies.ts
@@ -292,9 +326,9 @@ var HttpError = class extends Error {
 var ForbiddenError = (msg) => new HttpError(403, msg);
 
 // server/_core/sdk.ts
-import axios from "axios";
-import { parse as parseCookieHeader } from "cookie";
-import { SignJWT, jwtVerify } from "jose";
+var import_axios = __toESM(require("axios"), 1);
+var import_cookie = require("cookie");
+var import_jose = require("jose");
 var isNonEmptyString = (value) => typeof value === "string" && value.length > 0;
 var EXCHANGE_TOKEN_PATH = `/webdev.v1.WebDevAuthPublicService/ExchangeToken`;
 var GET_USER_INFO_PATH = `/webdev.v1.WebDevAuthPublicService/GetUserInfo`;
@@ -335,7 +369,7 @@ var OAuthService = class {
     return data;
   }
 };
-var createOAuthHttpClient = () => axios.create({
+var createOAuthHttpClient = () => import_axios.default.create({
   baseURL: ENV.oAuthServerUrl,
   timeout: AXIOS_TIMEOUT_MS
 });
@@ -392,7 +426,7 @@ var SDKServer = class {
     if (!cookieHeader) {
       return /* @__PURE__ */ new Map();
     }
-    const parsed = parseCookieHeader(cookieHeader);
+    const parsed = (0, import_cookie.parse)(cookieHeader);
     return new Map(Object.entries(parsed));
   }
   getSessionSecret() {
@@ -419,7 +453,7 @@ var SDKServer = class {
     const expiresInMs = options.expiresInMs ?? ONE_YEAR_MS;
     const expirationSeconds = Math.floor((issuedAt + expiresInMs) / 1e3);
     const secretKey = this.getSessionSecret();
-    return new SignJWT({
+    return new import_jose.SignJWT({
       openId: payload.openId,
       appId: payload.appId,
       name: payload.name
@@ -432,7 +466,7 @@ var SDKServer = class {
     }
     try {
       const secretKey = this.getSessionSecret();
-      const { payload } = await jwtVerify(cookieValue, secretKey, {
+      const { payload } = await (0, import_jose.jwtVerify)(cookieValue, secretKey, {
         algorithms: ["HS256"]
       });
       const { openId, appId, name } = payload;
@@ -552,7 +586,7 @@ function registerOAuthRoutes(app) {
       return;
     }
     const { nonce } = decodeOAuthState(state);
-    const expectedNonce = parseCookieHeader2(req.headers.cookie ?? "")[OAUTH_STATE_COOKIE];
+    const expectedNonce = (0, import_cookie2.parse)(req.headers.cookie ?? "")[OAUTH_STATE_COOKIE];
     if (!nonce || nonce !== expectedNonce) {
       res.status(403).json({ error: "invalid oauth state" });
       return;
@@ -628,8 +662,8 @@ function registerStorageProxy(app) {
 }
 
 // server/stripe.ts
-import express from "express";
-import Stripe from "stripe";
+var import_express = __toESM(require("express"), 1);
+var import_stripe = __toESM(require("stripe"), 1);
 
 // server/orderUtils.ts
 function encodePurchasedBooks(items) {
@@ -651,7 +685,7 @@ function getStripeClient() {
     throw new Error("Stripe payment processing is not configured.");
   }
   if (!stripeClient) {
-    stripeClient = new Stripe(process.env.STRIPE_SECRET_KEY);
+    stripeClient = new import_stripe.default(process.env.STRIPE_SECRET_KEY);
   }
   return stripeClient;
 }
@@ -659,7 +693,7 @@ function isStripeTestEvent(eventId) {
   return eventId.startsWith("evt_test_");
 }
 function registerStripeWebhook(app) {
-  app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+  app.post("/api/stripe/webhook", import_express.default.raw({ type: "application/json" }), async (req, res) => {
     const signature = req.headers["stripe-signature"];
     if (!signature || Array.isArray(signature) || !process.env.STRIPE_WEBHOOK_SECRET) {
       return res.status(400).json({ error: "Missing Stripe webhook signature." });
@@ -695,11 +729,11 @@ function registerStripeWebhook(app) {
 }
 
 // server/checkoutRouter.ts
-import { TRPCError as TRPCError5 } from "@trpc/server";
-import { z } from "zod";
+var import_server5 = require("@trpc/server");
+var import_zod = require("zod");
 
 // server/products.ts
-import { TRPCError as TRPCError2 } from "@trpc/server";
+var import_server2 = require("@trpc/server");
 var checkoutProducts = {
   "quiet-architect": { name: "The Quiet Architect", description: "by Elias Rowan", unitAmount: 59900 },
   "art-starting-again": { name: "The Art of Starting Again", description: "by Clara Bennett", unitAmount: 49900 },
@@ -726,10 +760,10 @@ function getCheckoutProducts(items) {
   return Array.from(combined, ([bookId, quantity]) => {
     const product = checkoutProducts[bookId];
     if (!product) {
-      throw new TRPCError2({ code: "BAD_REQUEST", message: "A selected book is no longer available for checkout." });
+      throw new import_server2.TRPCError({ code: "BAD_REQUEST", message: "A selected book is no longer available for checkout." });
     }
     if (quantity < 1 || quantity > 10) {
-      throw new TRPCError2({ code: "BAD_REQUEST", message: "Each title can have between one and ten copies in a checkout." });
+      throw new import_server2.TRPCError({ code: "BAD_REQUEST", message: "Each title can have between one and ten copies in a checkout." });
     }
     return { bookId, quantity, product };
   });
@@ -777,7 +811,7 @@ function createCheckoutSessionParams(input) {
 }
 
 // server/stripeCustomer.ts
-import { TRPCError as TRPCError3 } from "@trpc/server";
+var import_server3 = require("@trpc/server");
 async function ensureStripeCustomer(user) {
   if (user.stripeCustomerId) return user.stripeCustomerId;
   const customer = await getStripeClient().customers.create({
@@ -808,7 +842,7 @@ async function getSafePaymentMethods(user) {
 async function assertCustomerPaymentMethod(customerId, paymentMethodId) {
   const method = await getStripeClient().paymentMethods.retrieve(paymentMethodId);
   if (method.customer !== customerId || method.type !== "card") {
-    throw new TRPCError3({ code: "FORBIDDEN", message: "That payment method is not available on this profile." });
+    throw new import_server3.TRPCError({ code: "FORBIDDEN", message: "That payment method is not available on this profile." });
   }
 }
 async function setDefaultStripePaymentMethod(user, paymentMethodId) {
@@ -827,17 +861,17 @@ async function createStripeCustomerPortal(user, returnUrl) {
 }
 
 // server/_core/trpc.ts
-import { initTRPC, TRPCError as TRPCError4 } from "@trpc/server";
-import superjson from "superjson";
-var t = initTRPC.context().create({
-  transformer: superjson
+var import_server4 = require("@trpc/server");
+var import_superjson = __toESM(require("superjson"), 1);
+var t = import_server4.initTRPC.context().create({
+  transformer: import_superjson.default
 });
 var router = t.router;
 var publicProcedure = t.procedure;
 var requireUser = t.middleware(async (opts) => {
   const { ctx, next } = opts;
   if (!ctx.user) {
-    throw new TRPCError4({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
+    throw new import_server4.TRPCError({ code: "UNAUTHORIZED", message: UNAUTHED_ERR_MSG });
   }
   return next({
     ctx: {
@@ -851,7 +885,7 @@ var adminProcedure = t.procedure.use(
   t.middleware(async (opts) => {
     const { ctx, next } = opts;
     if (!ctx.user || ctx.user.role !== "admin") {
-      throw new TRPCError4({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
+      throw new import_server4.TRPCError({ code: "FORBIDDEN", message: NOT_ADMIN_ERR_MSG });
     }
     return next({
       ctx: {
@@ -863,15 +897,15 @@ var adminProcedure = t.procedure.use(
 );
 
 // server/checkoutRouter.ts
-var checkoutInput = z.object({
-  items: z.array(z.object({ bookId: z.string().min(1), quantity: z.number().int().min(1).max(10) })).min(1).max(18)
+var checkoutInput = import_zod.z.object({
+  items: import_zod.z.array(import_zod.z.object({ bookId: import_zod.z.string().min(1), quantity: import_zod.z.number().int().min(1).max(10) })).min(1).max(18)
 });
 var checkoutRouter = router({
   createSession: protectedProcedure.input(checkoutInput).mutation(async ({ ctx, input }) => {
     const entries = getCheckoutProducts(input.items);
     const origin = ctx.req.headers.origin || `${ctx.req.protocol}://${ctx.req.get("host")}`;
     if (!origin || origin.includes("undefined")) {
-      throw new TRPCError5({ code: "INTERNAL_SERVER_ERROR", message: "Could not determine a secure checkout return address." });
+      throw new import_server5.TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Could not determine a secure checkout return address." });
     }
     let session;
     try {
@@ -885,36 +919,36 @@ var checkoutRouter = router({
       session = await getStripeClient().checkout.sessions.create(createCheckoutSessionParams({ origin, customerId, user: ctx.user, entries, defaultAddressId: defaultAddress?.id }));
     } catch (error) {
       console.error("[Stripe checkout] Session creation failed", error);
-      throw new TRPCError5({ code: "INTERNAL_SERVER_ERROR", message: "Unable to start secure checkout. Please try again." });
+      throw new import_server5.TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Unable to start secure checkout. Please try again." });
     }
     if (!session.url) {
-      throw new TRPCError5({ code: "INTERNAL_SERVER_ERROR", message: "Stripe did not return a checkout link." });
+      throw new import_server5.TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Stripe did not return a checkout link." });
     }
     return { url: session.url };
   })
 });
 
 // server/profileRouter.ts
-import { z as z3 } from "zod";
+var import_zod3 = require("zod");
 
 // server/profileValidation.ts
-import { z as z2 } from "zod";
-var addressInputSchema = z2.object({
-  label: z2.string().trim().min(1).max(64),
-  fullName: z2.string().trim().min(2).max(160),
-  line1: z2.string().trim().min(3).max(255),
-  line2: z2.string().trim().max(255).optional().nullable(),
-  city: z2.string().trim().min(2).max(120),
-  state: z2.string().trim().min(2).max(120),
-  postalCode: z2.string().trim().min(4).max(24),
-  country: z2.literal("IN"),
-  phone: z2.string().trim().min(8).max(32).optional().nullable(),
-  isDefault: z2.boolean().optional()
+var import_zod2 = require("zod");
+var addressInputSchema = import_zod2.z.object({
+  label: import_zod2.z.string().trim().min(1).max(64),
+  fullName: import_zod2.z.string().trim().min(2).max(160),
+  line1: import_zod2.z.string().trim().min(3).max(255),
+  line2: import_zod2.z.string().trim().max(255).optional().nullable(),
+  city: import_zod2.z.string().trim().min(2).max(120),
+  state: import_zod2.z.string().trim().min(2).max(120),
+  postalCode: import_zod2.z.string().trim().min(4).max(24),
+  country: import_zod2.z.literal("IN"),
+  phone: import_zod2.z.string().trim().min(8).max(32).optional().nullable(),
+  isDefault: import_zod2.z.boolean().optional()
 }).strict();
 
 // server/profileRouter.ts
-var addressIdInput = z3.object({ id: z3.number().int().positive() });
-var paymentMethodInput = z3.object({ paymentMethodId: z3.string().min(1).max(255) });
+var addressIdInput = import_zod3.z.object({ id: import_zod3.z.number().int().positive() });
+var paymentMethodInput = import_zod3.z.object({ paymentMethodId: import_zod3.z.string().min(1).max(255) });
 function requestOrigin(request) {
   return request.headers.origin || `${request.protocol}://${request.get("host")}`;
 }
@@ -951,22 +985,22 @@ var profileRouter = router({
   }),
   orders: protectedProcedure.query(({ ctx }) => listOrdersForUser(ctx.user.id)),
   savedBooks: protectedProcedure.query(({ ctx }) => listSavedBooks(ctx.user.id)),
-  saveBook: protectedProcedure.input(z3.object({ bookId: z3.string().min(1).max(128) })).mutation(async ({ ctx, input }) => {
+  saveBook: protectedProcedure.input(import_zod3.z.object({ bookId: import_zod3.z.string().min(1).max(128) })).mutation(async ({ ctx, input }) => {
     getCheckoutProducts([{ bookId: input.bookId, quantity: 1 }]);
     await saveBook(ctx.user.id, input.bookId);
     return { success: true };
   }),
-  removeSavedBook: protectedProcedure.input(z3.object({ bookId: z3.string().min(1).max(128) })).mutation(async ({ ctx, input }) => {
+  removeSavedBook: protectedProcedure.input(import_zod3.z.object({ bookId: import_zod3.z.string().min(1).max(128) })).mutation(async ({ ctx, input }) => {
     await removeSavedBook(ctx.user.id, input.bookId);
     return { success: true };
   })
 });
 
 // server/_core/systemRouter.ts
-import { z as z4 } from "zod";
+var import_zod4 = require("zod");
 
 // server/_core/notification.ts
-import { TRPCError as TRPCError6 } from "@trpc/server";
+var import_server6 = require("@trpc/server");
 var TITLE_MAX_LENGTH = 1200;
 var CONTENT_MAX_LENGTH = 2e4;
 var trimValue = (value) => value.trim();
@@ -980,13 +1014,13 @@ var buildEndpointUrl = (baseUrl) => {
 };
 var validatePayload = (input) => {
   if (!isNonEmptyString2(input.title)) {
-    throw new TRPCError6({
+    throw new import_server6.TRPCError({
       code: "BAD_REQUEST",
       message: "Notification title is required."
     });
   }
   if (!isNonEmptyString2(input.content)) {
-    throw new TRPCError6({
+    throw new import_server6.TRPCError({
       code: "BAD_REQUEST",
       message: "Notification content is required."
     });
@@ -994,13 +1028,13 @@ var validatePayload = (input) => {
   const title = trimValue(input.title);
   const content = trimValue(input.content);
   if (title.length > TITLE_MAX_LENGTH) {
-    throw new TRPCError6({
+    throw new import_server6.TRPCError({
       code: "BAD_REQUEST",
       message: `Notification title must be at most ${TITLE_MAX_LENGTH} characters.`
     });
   }
   if (content.length > CONTENT_MAX_LENGTH) {
-    throw new TRPCError6({
+    throw new import_server6.TRPCError({
       code: "BAD_REQUEST",
       message: `Notification content must be at most ${CONTENT_MAX_LENGTH} characters.`
     });
@@ -1010,13 +1044,13 @@ var validatePayload = (input) => {
 async function notifyOwner(payload) {
   const { title, content } = validatePayload(payload);
   if (!ENV.forgeApiUrl) {
-    throw new TRPCError6({
+    throw new import_server6.TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service URL is not configured."
     });
   }
   if (!ENV.forgeApiKey) {
-    throw new TRPCError6({
+    throw new import_server6.TRPCError({
       code: "INTERNAL_SERVER_ERROR",
       message: "Notification service API key is not configured."
     });
@@ -1050,16 +1084,16 @@ async function notifyOwner(payload) {
 // server/_core/systemRouter.ts
 var systemRouter = router({
   health: publicProcedure.input(
-    z4.object({
-      timestamp: z4.number().min(0, "timestamp cannot be negative")
+    import_zod4.z.object({
+      timestamp: import_zod4.z.number().min(0, "timestamp cannot be negative")
     })
   ).query(() => ({
     ok: true
   })),
   notifyOwner: adminProcedure.input(
-    z4.object({
-      title: z4.string().min(1, "title is required"),
-      content: z4.string().min(1, "content is required")
+    import_zod4.z.object({
+      title: import_zod4.z.string().min(1, "title is required"),
+      content: import_zod4.z.string().min(1, "content is required")
     })
   ).mutation(async ({ input }) => {
     const delivered = await notifyOwner(input);
@@ -1110,21 +1144,22 @@ async function createContext(opts) {
 
 // server/app.ts
 function createApp() {
-  const app = express2();
+  const app = (0, import_express2.default)();
   registerStripeWebhook(app);
-  app.use(express2.json({ limit: "50mb" }));
-  app.use(express2.urlencoded({ limit: "50mb", extended: true }));
+  app.use(import_express2.default.json({ limit: "50mb" }));
+  app.use(import_express2.default.urlencoded({ limit: "50mb", extended: true }));
   registerStorageProxy(app);
   registerOAuthRoutes(app);
   app.use(
     "/api/trpc",
-    createExpressMiddleware({
+    (0, import_express3.createExpressMiddleware)({
       router: appRouter,
       createContext
     })
   );
   return app;
 }
-export {
+// Annotate the CommonJS export names for ESM import in node:
+0 && (module.exports = {
   createApp
-};
+});
