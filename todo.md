@@ -61,3 +61,7 @@
 - [x] Verify the latest wishlist and order-history features are committed and pushed to the connected GitHub repository.
 - [x] Diagnose Vercel deployment `bom1::9vbm9-1787891572135-05981822b5b8` and document the recovery path without triggering deployment.
 - [x] Document the Vercel recovery path: initialize a deployment from `main`, confirm production branch and project settings, then retry the deployment URL.
+- [x] Adapt the Express/tRPC backend for Vercel Functions so deployed auth, profile, and Stripe checkout routes are reachable.
+- [x] Add and run tests for the Vercel API entry point, then redeploy and verify the production API response.
+- [ ] Push the Vercel API adapter changes to `main` and trigger a fresh production deployment.
+- [ ] Verify `/api/trpc/auth.me`, protected profile, checkout, and Stripe webhook routes on Vercel and document any remaining limitations.
