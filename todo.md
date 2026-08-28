@@ -55,6 +55,6 @@
 - [x] Add checkout-session and populated order-history/saved-book rendered state coverage.
 - [x] Verify the new profile tabs and saved-book/order-history presentation at a desktop breakpoint.
 - [x] Capture and review the order-history and saved-books profile tabs at desktop width.
-- [ ] Add a clear Add to bag action for each saved book that updates the cart immediately.
-- [ ] Add a Buy again/Reorder action for each past order that restores its purchasable items to the cart for quick checkout.
-- [ ] Add tests and responsive verification for saved-book add-to-bag and past-order reorder behavior.
+- [x] Add a clear Add to bag action for each saved book that updates the cart immediately.
+- [x] Add a Buy again/Reorder action for each past order that restores its purchasable items to the cart for quick checkout.
+- [x] Add tests and responsive verification for saved-book add-to-bag and past-order reorder behavior.

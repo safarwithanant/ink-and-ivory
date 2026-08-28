@@ -11,3 +11,9 @@ export function updateCartItemQuantity(cart: CartState, bookId: string, amount: 
 export function getCartItemCount(cart: CartState) {
   return Object.values(cart).reduce((total, quantity) => total + quantity, 0);
 }
+
+export type CartLine = { bookId: string; quantity: number };
+
+export function mergeCartItems(cart: CartState, items: CartLine[], maxPerTitle = 10): CartState {
+  return items.reduce((next, item) => updateCartItemQuantity(next, item.bookId, item.quantity, maxPerTitle), { ...cart });
+}
