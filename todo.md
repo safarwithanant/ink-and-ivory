@@ -58,3 +58,6 @@
 - [x] Add a clear Add to bag action for each saved book that updates the cart immediately.
 - [x] Add a Buy again/Reorder action for each past order that restores its purchasable items to the cart for quick checkout.
 - [x] Add tests and responsive verification for saved-book add-to-bag and past-order reorder behavior.
+- [x] Verify the latest wishlist and order-history features are committed and pushed to the connected GitHub repository.
+- [x] Diagnose Vercel deployment `bom1::9vbm9-1787891572135-05981822b5b8` and document the recovery path without triggering deployment.
+- [x] Document the Vercel recovery path: initialize a deployment from `main`, confirm production branch and project settings, then retry the deployment URL.
