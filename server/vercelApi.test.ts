@@ -1,6 +1,6 @@
 import { createServer, type Server } from "node:http";
 import { afterEach, describe, expect, it } from "vitest";
-import apiApp from "../api/index";
+import { createApp } from "./app";
 
 let server: Server | undefined;
 
@@ -14,7 +14,7 @@ afterEach(async () => {
 
 describe("Vercel API entrypoint", () => {
   it("serves the public auth query through the shared Express app", async () => {
-    server = createServer(apiApp);
+    server = createServer(createApp());
     await new Promise<void>((resolve, reject) => {
       server?.listen(0, "127.0.0.1", () => resolve());
       server?.once("error", reject);
