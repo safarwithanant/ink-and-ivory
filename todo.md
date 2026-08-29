@@ -65,3 +65,4 @@
 - [x] Add and run tests for the Vercel API entry point, then redeploy and verify the production API response.
 - [ ] Push the Vercel API adapter changes to `main` and trigger a fresh production deployment.
 - [ ] Verify `/api/trpc/auth.me`, protected profile, checkout, and Stripe webhook routes on Vercel and document any remaining limitations.
+- [ ] Resolve Vercel’s native TypeScript Function module-resolution failure by using a self-contained Function bundle or explicit runtime-compatible imports.
